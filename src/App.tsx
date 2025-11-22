@@ -1,10 +1,10 @@
-import Home from "./components/pages/Home"
+import LandingPage from "./pages/LandingPage"
 
 function App() {
 
   return (
     <div>
-      <Home/>
+      <LandingPage/>
     </div>
   )
 

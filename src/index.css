@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@plugin "tailwindcss-animate"; /* Opsional: jika nanti pakai animasi */
+
+@theme {
+  /* 1. Font Family */
+  --font-sans: 'Poppins', sans-serif;
+
+  /* 2. Color Palette (Sesuai Desain Helpo) */
+  --color-primary: #3B82F6;       /* Biru Utama */
+  --color-primary-dark: #2563EB;  /* Biru Hover */
+  --color-secondary: #1E293B;     /* Teks Gelap */
+  --color-accent: #F59E0B;        /* Kuning/Orange */
+  --color-light: #F8FAFC;         /* Background Terang */
+  
+  /* Container Setup (Agar otomatis tengah) */
+  --container-center: true;
+  --container-padding: 1rem;
+}
+
+/* Global Styles */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-secondary);
+    background-color: white;
+    -webkit-font-smoothing: antialiased;
+  }
+}
