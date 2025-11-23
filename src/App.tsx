@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import ServiceListingPage from './pages/ServerListingPage';
+import ServiceListingPage from './pages/ServiceListingPage';
 
 function App() {
   return (
