@@ -14,6 +14,7 @@ import NotificationPage from '@/pages/NotificationPage';
 import UserReviewsPage from '@/pages/UserReviewsPage';
 import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
+import HistoryPage from '@/pages/HistoryPage';
 
 function App() {
   return (
@@ -38,6 +39,9 @@ function App() {
 
         {/* Service Booking Routes (Halaman Booking Jasa) */}
         <Route path="/booking/:id" element={<BookingPage />} />
+
+        {/* History Routes (Halaman riwayat) */}
+        <Route path="/history" element={<HistoryPage />} />
 
         {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />
