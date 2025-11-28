@@ -4,8 +4,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import ServiceListingPage from './pages/ServiceListingPage';
-import SchedulePage from './pages/SchedulePage';
+import ServiceListingPage from '@/pages/ServiceListingPage';
+import ServiceDetailPage from '@/pages/ServiceDetailPage';
+import BookingPage from '@/pages/BookingPage';
+import SchedulePage from '@/pages/SchedulePage';
+import PaymentPage from '@/pages/PaymentPage';
+import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
 
 function App() {
   return (
@@ -21,10 +25,20 @@ function App() {
         {/* Product Routes (Halaman Cari Jasa) */}
         <Route path="/services" element={<ServiceListingPage />} />
 
-        {/* Product Routes (Halaman Cari Jasa) */}
+        {/* Payment Routes */}
+        <Route path="/payment/:id" element={<PaymentPage />} />
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
+
+        {/* Service Detail Routes (Halaman Detail Jasa)*/}
+        <Route path="/service/:id" element={<ServiceDetailPage />} />
+
+        {/* Service Booking Routes (Halaman Booking Jasa) */}
+        <Route path="/booking/:id" element={<BookingPage />} />
+
+        {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />
-        
-        {/* 4. Route 404 (Jika halaman tidak ditemukan) */}
+
+        {/* Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
           <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="text-center">

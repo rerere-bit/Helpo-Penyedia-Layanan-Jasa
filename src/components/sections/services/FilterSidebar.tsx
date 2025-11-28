@@ -1,83 +1,121 @@
-import { RotateCcw, ChevronDown, Star } from 'lucide-react'; // <--- Star ditambahkan
+import React from 'react';
+import { RotateCcw, ChevronDown, Star } from 'lucide-react';
 import { Button } from '@/components/common/Button';
+import type { FilterState } from '@/types';
 
-export const FilterSidebar = () => {
+interface FilterSidebarProps {
+  filters: FilterState;
+  setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+}
+
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) => {
+  
+  const handleReset = () => {
+    setFilters({
+      keyword: '',
+      category: 'Semua',
+      location: 'Semua',
+      minPrice: 0,
+      maxPrice: 1000000,
+      minRating: 0
+    });
+  };
+
+  const handleChange = (key: keyof FilterState, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className="bg-white p-6 rounded-2xl border border-gray-100 sticky top-28">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h3 className="font-bold text-gray-800">Filter</h3>
-        <button className="text-gray-400 hover:text-primary transition-colors">
+        <button onClick={handleReset} className="text-gray-400 hover:text-primary transition-colors">
           <RotateCcw size={16} />
         </button>
       </div>
 
-      {/* Kategori Dropdown */}
+      {/* Kategori */}
       <div className="mb-6">
         <label className="block text-xs font-semibold text-gray-500 mb-2">Kategori</label>
         <div className="relative">
-          <select className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer">
-            <option>Semua</option>
-            <option>Pembersihan</option>
-            <option>Perbaikan</option>
-            <option>Listrik</option>
+          <select 
+            value={filters.category}
+            onChange={(e) => handleChange('category', e.target.value)}
+            className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="Semua">Semua Kategori</option>
+            <option value="Pembersihan">Pembersihan</option>
+            <option value="Perbaikan">Perbaikan</option>
+            <option value="Listrik">Listrik</option>
+            <option value="Taman">Taman</option>
+            <option value="Cat">Cat & Renovasi</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
       </div>
 
-      {/* Lokasi Dropdown */}
+      {/* Lokasi */}
       <div className="mb-8">
         <label className="block text-xs font-semibold text-gray-500 mb-2">Lokasi</label>
         <div className="relative">
-          <select className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer">
-            <option>Semua Lokasi</option>
-            <option>Jakarta</option>
-            <option>Bandung</option>
-            <option>Surabaya</option>
+          <select 
+            value={filters.location}
+            onChange={(e) => handleChange('location', e.target.value)}
+            className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="Semua">Semua Lokasi</option>
+            <option value="Jakarta">Jakarta</option>
+            <option value="Bandung">Bandung</option>
+            <option value="Surabaya">Surabaya</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
       </div>
 
-      {/* Rentang Harga (Visual Slider) */}
+      {/* Range Harga */}
       <div className="mb-8">
         <div className="flex justify-between text-xs font-semibold text-gray-500 mb-2">
-          <span>Rentang Harga</span>
+          <span>Maksimal Harga</span>
+          <span className="text-primary">Rp {filters.maxPrice.toLocaleString('id-ID')}</span>
         </div>
-        <div className="relative h-2 bg-blue-100 rounded-full mb-3">
-          <div className="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full"></div>
-          {/* Perbaikan: -translate-x-0 dihapus/diganti translate-x-0 */}
-          <div className="absolute top-1/2 left-0 translate-x-0 -translate-y-1/2 w-4 h-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
-          <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
-        </div>
-        <div className="flex justify-between text-[10px] text-gray-400 font-medium">
-          <span>Rp 0</span>
-          <span>Rp 500,000</span>
-        </div>
+        <input 
+          type="range"
+          min="0"
+          max="1000000"
+          step="50000"
+          value={filters.maxPrice}
+          onChange={(e) => handleChange('maxPrice', Number(e.target.value))}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
       </div>
 
-      {/* Rating (Visual Slider) */}
+      {/* Rating Minimum */}
       <div className="mb-10">
         <div className="flex justify-between text-xs font-semibold text-gray-500 mb-2">
-          <span>Rating</span>
+          <span>Rating Minimum</span>
+          <span className="flex items-center gap-1 text-primary">
+            {filters.minRating} <Star size={10} fill="currentColor" />
+          </span>
         </div>
-        <div className="relative h-2 bg-blue-100 rounded-full mb-3">
-          <div className="absolute right-0 top-0 h-full w-1/4 bg-primary rounded-full"></div>
-          <div className="absolute top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
-          <div className="absolute top-1/2 right-0 translate-x-0 -translate-y-1/2 w-4 h-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
-        </div>
-        <div className="flex justify-between text-[10px] text-gray-400 font-medium">
-          {/* Icon Star sekarang sudah dikenali */}
-          <span className="flex items-center gap-1">0 <Star size={10} fill="currentColor" className="text-yellow-400"/></span>
-          <span className="flex items-center gap-1">5 <Star size={10} fill="currentColor" className="text-yellow-400"/></span>
+        <input 
+          type="range"
+          min="0"
+          max="5"
+          step="0.5"
+          value={filters.minRating}
+          onChange={(e) => handleChange('minRating', Number(e.target.value))}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-yellow-400"
+        />
+        <div className="flex justify-between text-[10px] text-gray-400 font-medium mt-2">
+          <span>0 Bintang</span>
+          <span>5 Bintang</span>
         </div>
       </div>
 
-      <Button variant="outline" fullWidth className="border-gray-200 text-gray-600 hover:text-primary hover:border-primary gap-2">
+      <Button variant="outline" fullWidth onClick={handleReset} className="border-gray-200 text-gray-600 hover:text-primary hover:border-primary gap-2">
         <RotateCcw size={16} />
         Reset Filter
       </Button>
     </div>
-  );
+  );  
 };

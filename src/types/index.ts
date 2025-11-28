@@ -3,18 +3,25 @@
 export interface Service {
   id: string;
   title: string;
-  slug: string;
   category: string;
   price: number;
-  priceUnit: string;
   rating: number;
   reviewCount: number;
   description: string;
   thumbnailUrl: string;
   provider: {
     name: string;
-    avatarUrl: string;
     location: string;
+    avatarUrl?: string;
     isVerified: boolean;
   };
+}
+
+export interface FilterState {
+  keyword: string;
+  category: string;
+  location: string;
+  minPrice: number;
+  maxPrice: number;
+  minRating: number;
 }

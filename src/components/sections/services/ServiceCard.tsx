@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // 1. Import hook navigasi
 import type { Service } from '@/types';
 import { Button } from '@/components/common/Button';
 
@@ -8,6 +9,8 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({ data }) => {
+  const navigate = useNavigate(); // 2. Inisialisasi hook
+
   const formatRupiah = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -17,10 +20,13 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
-      
+    <div 
+      onClick={() => navigate(`/service/${data.id}`)}
+      className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer"
+    >
+
       {/* Image & Badge */}
-      <div className="relative h-48">
+      <div className="relative h-48" >
         <img 
           src={data.thumbnailUrl} 
           alt={data.title} 
@@ -65,6 +71,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ data }) => {
           <span className="text-primary font-bold text-base">
             {formatRupiah(data.price)}
           </span>
+          {/* Karena button ada di dalam div yang bisa diklik, klik pada button juga akan memicu navigasi */}
           <Button size="sm" className="px-6 h-9 rounded-lg text-xs font-semibold">
             Pesan Jasa
           </Button>
