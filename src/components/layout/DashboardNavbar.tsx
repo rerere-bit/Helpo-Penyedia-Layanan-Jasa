@@ -1,15 +1,45 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // 1. Tambahkan useLocation
 import { Home, Search, Clock, Calendar, HelpCircle, Bell, User, LogOut } from 'lucide-react';
 import { Container } from '@/components/common/Container';
 import { Button } from '@/components/common/Button';
 
 const DashboardNavbar = () => {
+  const location = useLocation(); // 2. Ambil data lokasi/URL saat ini
+  const currentPath = location.pathname; // 3. Simpan path saat ini
+  
+  // 4. Ubah logika 'active' menjadi dinamis (membandingkan path)
   const menus = [
-    { name: 'Beranda', icon: <Home size={18} />, href: '/dashboard', active: false },
-    { name: 'Cari Jasa', icon: <Search size={18} />, href: '/services', active: true }, // Sedang aktif
-    { name: 'Riwayat', icon: <Clock size={18} />, href: '/history', active: false },
-    { name: 'Jadwal', icon: <Calendar size={18} />, href: '/schedule', active: false },
-    { name: 'Bantuan', icon: <HelpCircle size={18} />, href: '/help', active: false },
+    { 
+      name: 'Beranda', 
+      icon: <Home size={18} />, 
+      href: '/dashboard', 
+      active: currentPath === '/dashboard' 
+    },
+    { 
+      name: 'Cari Jasa', 
+      icon: <Search size={18} />, 
+      href: '/services', 
+      // Menggunakan startsWith agar tetap aktif saat masuk ke detail jasa (/service/1)
+      active: currentPath.startsWith('/services') || currentPath.startsWith('/service') 
+    },
+    { 
+      name: 'Riwayat', 
+      icon: <Clock size={18} />, 
+      href: '/history', 
+      active: currentPath === '/history' 
+    },
+    { 
+      name: 'Jadwal', 
+      icon: <Calendar size={18} />, 
+      href: '/schedule', 
+      active: currentPath === '/schedule' 
+    },
+    { 
+      name: 'Bantuan', 
+      icon: <HelpCircle size={18} />, 
+      href: '/help', 
+      active: currentPath === '/help' 
+    },
   ];
 
   return (
@@ -33,8 +63,8 @@ const DashboardNavbar = () => {
                 to={menu.href}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   menu.active 
-                    ? 'bg-blue-100 text-primary' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'bg-blue-100 text-primary' // Style jika Aktif
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100' // Style jika Tidak Aktif
                 }`}
               >
                 {menu.icon}
@@ -45,13 +75,14 @@ const DashboardNavbar = () => {
 
           {/* Right Menu (Profile) */}
           <div className="flex items-center gap-4">
-            <Link to="/notification" className="relative text-gray-500 hover:text-primary p-1">
+            <Link to="/notifications" className="relative text-gray-500 hover:text-primary p-1">
               <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </Link>
-            <button className="text-gray-500 hover:text-primary p-1">
+          
+            <Link to="/profile" className="text-gray-500 hover:text-primary p-1">
               <User size={20} />
-            </button>
+            </Link>          
             
             <div className="h-6 w-px bg-gray-200 mx-1"></div>
 

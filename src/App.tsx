@@ -13,6 +13,7 @@ import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
 import NotificationPage from '@/pages/NotificationPage';
 import UserReviewsPage from '@/pages/UserReviewsPage';
 import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
 
 function App() {
   return (
@@ -40,6 +41,9 @@ function App() {
 
         {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />
+
+        {/* Route Baru untuk Detail Pesanan (bisa diakses dari Jadwal atau Riwayat) */}
+        <Route path="/order/:id" element={<OrderDetailPage />} />
 
         {/* Notification Routes (Halaman Notifikasi) */}
         <Route path="/notification" element={<NotificationPage />} />
