@@ -45,10 +45,10 @@ const DashboardNavbar = () => {
 
           {/* Right Menu (Profile) */}
           <div className="flex items-center gap-4">
-            <button className="relative text-gray-500 hover:text-primary p-1">
+            <Link to="/notification" className="relative text-gray-500 hover:text-primary p-1">
               <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-            </button>
+            </Link>
             <button className="text-gray-500 hover:text-primary p-1">
               <User size={20} />
             </button>

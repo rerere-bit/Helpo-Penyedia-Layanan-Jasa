@@ -10,6 +10,7 @@ import BookingPage from '@/pages/BookingPage';
 import SchedulePage from '@/pages/SchedulePage';
 import PaymentPage from '@/pages/PaymentPage';
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
+import NotificationPage from '@/pages/NotificationPage';
 
 function App() {
   return (
@@ -37,6 +38,9 @@ function App() {
 
         {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />
+
+        {/* Notification Routes (Halaman Notifikasi) */}
+        <Route path="/notification" element={<NotificationPage />} />
 
         {/* Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
