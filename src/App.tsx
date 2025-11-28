@@ -5,6 +5,7 @@ import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import ServiceListingPage from './pages/ServiceListingPage';
+import HistoryPage from './pages/HistoryPage';
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
         
         {/* 3. Product Routes (Halaman Cari Jasa) */}
         <Route path="/services" element={<ServiceListingPage />} />
+
+        {/* 4. History Routes (Halaman Riwayat Pesanan) */} 
+        <Route path="/history" element={<HistoryPage />} />
         
         {/* 4. Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
