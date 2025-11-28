@@ -11,6 +11,8 @@ import SchedulePage from '@/pages/SchedulePage';
 import PaymentPage from '@/pages/PaymentPage';
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
 import NotificationPage from '@/pages/NotificationPage';
+import UserReviewsPage from '@/pages/UserReviewsPage';
+import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 
 function App() {
   return (
@@ -41,6 +43,10 @@ function App() {
 
         {/* Notification Routes (Halaman Notifikasi) */}
         <Route path="/notification" element={<NotificationPage />} />
+
+        {/* Review Routes */}
+        <Route path="/user/reviews" element={<UserReviewsPage />} />
+        <Route path="/provider/reviews" element={<ProviderReviewsPage />} />
 
         {/* Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
