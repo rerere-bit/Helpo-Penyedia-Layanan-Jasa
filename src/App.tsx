@@ -11,6 +11,7 @@ import SchedulePage from '@/pages/SchedulePage';
 import PaymentPage from '@/pages/PaymentPage';
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
 import NotificationPage from '@/pages/NotificationPage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
 
 function App() {
   return (
@@ -38,6 +39,9 @@ function App() {
 
         {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />
+
+        {/* Route Baru untuk Detail Pesanan (bisa diakses dari Jadwal atau Riwayat) */}
+        <Route path="/order/:id" element={<OrderDetailPage />} />
 
         {/* Notification Routes (Halaman Notifikasi) */}
         <Route path="/notification" element={<NotificationPage />} />
