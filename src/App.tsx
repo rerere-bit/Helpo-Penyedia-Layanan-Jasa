@@ -5,20 +5,24 @@ import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import ServiceListingPage from './pages/ServiceListingPage';
+import SchedulePage from './pages/SchedulePage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* 1. Route Utama (Landing Page) */}
+        {/* Route Utama (Landing Page) */}
         <Route path="/" element={<LandingPage />} />
         
-        {/* 2. Auth Routes (Halaman Login & Register) */}
+        {/* Auth Routes (Halaman Login & Register) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
-        {/* 3. Product Routes (Halaman Cari Jasa) */}
+        {/* Product Routes (Halaman Cari Jasa) */}
         <Route path="/services" element={<ServiceListingPage />} />
+
+        {/* Product Routes (Halaman Cari Jasa) */}
+        <Route path="/schedule" element={<SchedulePage />} />
         
         {/* 4. Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
