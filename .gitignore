@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+technical_spec_reviews.md
+walkthrough_reviews.md

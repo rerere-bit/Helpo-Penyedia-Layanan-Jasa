@@ -45,8 +45,10 @@ function App() {
         <Route path="/notification" element={<NotificationPage />} />
 
         {/* Review Routes */}
+          {/* user */}
         <Route path="/user/reviews" element={<UserReviewsPage />} />
-        <Route path="/provider/reviews" element={<ProviderReviewsPage />} />
+          {/* admin */}
+        <Route path="/provider/reviews" element={<ProviderReviewsPage />} /> 
 
         {/* Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={
