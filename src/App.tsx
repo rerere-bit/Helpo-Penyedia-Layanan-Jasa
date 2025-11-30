@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import DashboardHomePage from '@/pages/DashboardHomePage';
 import ServiceListingPage from '@/pages/ServiceListingPage';
 import ServiceDetailPage from '@/pages/ServiceDetailPage';
 import BookingPage from '@/pages/BookingPage';
@@ -15,6 +16,7 @@ import UserReviewsPage from '@/pages/UserReviewsPage';
 import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import HistoryPage from '@/pages/HistoryPage';
+import ProfilePage from '@/pages/ProfilePage';
 
 function App() {
   return (
@@ -42,6 +44,12 @@ function App() {
 
         {/* History Routes (Halaman riwayat) */}
         <Route path="/history" element={<HistoryPage />} />
+
+        {/* Profile Page Routes (Halaman Profil) */}
+        <Route path="/profile" element={<ProfilePage />} />
+
+        {/* Main Dashboard Routes (Halaman Beranda Login) */}
+        <Route path="/dashboard" element={<DashboardHomePage />} />
 
         {/* Schedule Routes (Halaman Penjadwalan) */}
         <Route path="/schedule" element={<SchedulePage />} />

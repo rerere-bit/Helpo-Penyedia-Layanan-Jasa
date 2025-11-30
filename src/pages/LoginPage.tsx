@@ -20,7 +20,7 @@ const LoginPage = () => {
     setTimeout(() => {
       setIsLoading(false);
       // Redirect ke halaman Cari Jasa (Dashboard)
-      navigate('/services'); 
+      navigate('/dashboard'); 
     }, 1500);
   };
 
