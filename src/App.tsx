@@ -17,6 +17,7 @@ import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import HistoryPage from '@/pages/HistoryPage';
 import ProfilePage from '@/pages/ProfilePage';
+import EditProfilePage from '@/pages/EditProfilePage';
 import HelpPage from '@/pages/HelpPage';
 
 
@@ -49,6 +50,7 @@ function App() {
 
         {/* Profile Page Routes (Halaman Profil) */}
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
 
         {/* Main Dashboard Routes (Halaman Beranda Login) */}
         <Route path="/dashboard" element={<DashboardHomePage />} />

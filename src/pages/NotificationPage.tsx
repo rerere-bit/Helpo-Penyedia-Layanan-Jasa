@@ -149,7 +149,7 @@ const NotificationPage = () => {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === 'all' 
-                  ? 'bg-primary text-white shadow-md shadow-blue-200' 
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-200' 
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
               }`}
             >
@@ -159,7 +159,7 @@ const NotificationPage = () => {
               onClick={() => setFilter('unread')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === 'unread' 
-                  ? 'bg-primary text-white shadow-md shadow-blue-200' 
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-200' 
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
               }`}
             >
@@ -173,7 +173,7 @@ const NotificationPage = () => {
               filteredNotifications.map((notif) => (
                 <Card 
                   key={notif.id} 
-                  className={`p-6 flex gap-4 transition-all hover:shadow-md cursor-pointer ${!notif.isRead ? 'border-l-4 border-l-primary bg-blue-50/10' : ''}`}
+                  className={`p-6 flex gap-4 transition-all hover:shadow-md cursor-pointer ${!notif.isRead ? 'border-l-4 border-l-blue-800 bg-blue-50/10' : ''}`}
                 >
                   {/* Icon */}
                   <div className="shrink-0">
@@ -189,7 +189,7 @@ const NotificationPage = () => {
                       
                       {/* Dot Indikator Belum Dibaca */}
                       {!notif.isRead && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-800 mt-1.5 shrink-0"></span>
                       )}
                     </div>
                     

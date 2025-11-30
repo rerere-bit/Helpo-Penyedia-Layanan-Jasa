@@ -51,7 +51,7 @@ const UserReviewsPage = () => {
                 </span>
               )}
               {activeTab === 'waiting' && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-800 rounded-t-full"></div>
               )}
             </button>
             <button
@@ -64,7 +64,7 @@ const UserReviewsPage = () => {
             >
               Daftar Ulasan
               {activeTab === 'history' && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-800 rounded-t-full"></div>
               )}
             </button>
           </div>

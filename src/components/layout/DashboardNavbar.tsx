@@ -75,7 +75,7 @@ const DashboardNavbar = () => {
 
           {/* Right Menu (Profile) */}
           <div className="flex items-center gap-4">
-            <Link to="/notifications" className="relative text-gray-500 hover:text-primary p-1">
+            <Link to="/notification" className="relative text-gray-500 hover:text-primary p-1">
               <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </Link>

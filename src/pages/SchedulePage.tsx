@@ -114,7 +114,7 @@ const SchedulePage = () => {
               className={`
                 h-9 w-9 mx-auto rounded-full flex items-center justify-center relative transition-all duration-200
                 ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-100'}
-                ${isSelected ? 'bg-primary text-white hover:bg-blue-700 shadow-md shadow-blue-200 scale-110 font-bold' : ''}
+                ${isSelected ? 'bg-blue-800 text-white hover:bg-blue-700 shadow-md shadow-blue-200 scale-110 font-bold' : ''}
               `}
             >
               {format(dayItem, 'd')}
@@ -143,7 +143,7 @@ const SchedulePage = () => {
           {/* Toggle Pengingat */}
           <div className="bg-white border border-gray-100 p-5 rounded-2xl flex items-center justify-between mb-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-               <div className={`p-3 rounded-xl transition-colors ${isReminderOn ? 'bg-blue-50 text-primary' : 'bg-gray-100 text-gray-400'}`}>
+               <div className={`p-3 rounded-xl transition-colors ${isReminderOn ? 'bg-blue-50 text-blue-800' : 'bg-gray-100 text-gray-400'}`}>
                  <BellRing size={24} />
                </div>
                <div>
