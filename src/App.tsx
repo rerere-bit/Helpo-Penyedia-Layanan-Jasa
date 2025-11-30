@@ -19,7 +19,9 @@ import HistoryPage from '@/pages/HistoryPage';
 import ProfilePage from '@/pages/ProfilePage';
 import EditProfilePage from '@/pages/EditProfilePage';
 import HelpPage from '@/pages/HelpPage';
-
+import ProviderDashboard from './pages/provider/ProviderDashboard';
+import ProviderOrdersPage from './pages/provider/ProviderOrdersPage';
+import ProviderServicesPage from './pages/provider/ProviderServicesPage';
 
 function App() {
   return (
@@ -71,7 +73,22 @@ function App() {
           {/* user */}
         <Route path="/user/reviews" element={<UserReviewsPage />} />
           {/* admin */}
-        <Route path="/provider/reviews" element={<ProviderReviewsPage />} /> 
+        <Route path="/provider/reviews" element={<ProviderReviewsPage />} />
+
+        {/* === RUTE PROVIDER / MITRA === */}
+        <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+        
+        {/* Placeholder untuk menu lain agar sidebar tidak error 404 */}
+        <Route path="/provider/*" element={<ProviderDashboard />} />
+
+        <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+        {/* Route Baru */}
+        <Route path="/provider/orders" element={<ProviderOrdersPage />} />
+
+        <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+        <Route path="/provider/orders" element={<ProviderOrdersPage />} />
+        {/* Route Baru */}
+        <Route path="/provider/services" element={<ProviderServicesPage />} />
 
         {/* Route 404 (Jika halaman tidak ditemukan) */}
         <Route path="*" element={

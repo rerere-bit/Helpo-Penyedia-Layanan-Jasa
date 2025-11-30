@@ -19,8 +19,9 @@ const LoginPage = () => {
     // Simulasi loading 1.5 detik (agar terasa seperti aplikasi nyata)
     setTimeout(() => {
       setIsLoading(false);
-      // Redirect ke halaman Cari Jasa (Dashboard)
-      navigate('/dashboard'); 
+      // Redirect berdasarkan peran: jika provider, ke Provider Dashboard
+      const destination = role === 'provider' ? '/provider/dashboard' : '/dashboard';
+      navigate(destination);
     }, 1500);
   };
 
