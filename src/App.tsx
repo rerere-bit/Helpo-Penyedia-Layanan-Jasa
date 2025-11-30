@@ -17,6 +17,8 @@ import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import HistoryPage from '@/pages/HistoryPage';
 import ProfilePage from '@/pages/ProfilePage';
+import HelpPage from '@/pages/HelpPage';
+
 
 function App() {
   return (
@@ -59,6 +61,9 @@ function App() {
 
         {/* Notification Routes (Halaman Notifikasi) */}
         <Route path="/notification" element={<NotificationPage />} />
+
+        {/* Help Routes (Halaman Bantuan) */}
+        <Route path="/help" element={<HelpPage />} />
 
         {/* Review Routes */}
           {/* user */}
