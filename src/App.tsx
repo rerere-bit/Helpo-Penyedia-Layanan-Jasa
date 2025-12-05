@@ -12,6 +12,7 @@ import SchedulePage from '@/pages/SchedulePage';
 import PaymentPage from '@/pages/PaymentPage';
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
 import NotificationPage from '@/pages/NotificationPage';
+import SettingsPage from '@/pages/SettingsPage';
 import UserReviewsPage from '@/pages/UserReviewsPage';
 import ProviderReviewsPage from '@/pages/ProviderReviewsPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
@@ -65,6 +66,9 @@ function App() {
 
         {/* Notification Routes (Halaman Notifikasi) */}
         <Route path="/notification" element={<NotificationPage />} />
+
+        {/* Settings Routes (Halaman Pengaturan) */}
+        <Route path="/settings" element={<SettingsPage />} />
 
         {/* Help Routes (Halaman Bantuan) */}
         <Route path="/help" element={<HelpPage />} />

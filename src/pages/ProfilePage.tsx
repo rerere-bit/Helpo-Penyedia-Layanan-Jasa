@@ -18,8 +18,8 @@ const ProfilePage = () => {
   };
 
   const menuItems = [
-    // Mengarahkan ke Settings (Tab Notifikasi)
-    { icon: <Bell size={20} />, label: "Notifikasi", href: "/settings" }, 
+    // Mengarahkan ke halaman Notifikasi
+    { icon: <Bell size={20} />, label: "Notifikasi", href: "/notification" }, 
     // Mengarahkan ke Settings (Tab Keamanan)
     { icon: <Lock size={20} />, label: "Ubah Password", href: "/settings" }, 
     { icon: <Shield size={20} />, label: "Privasi & Keamanan", href: "/settings" },

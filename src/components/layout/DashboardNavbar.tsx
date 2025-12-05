@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'; // 1. Tambahkan useLocation
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // 1. Tambahkan useLocation, useNavigate
 import { Home, Search, Clock, Calendar, HelpCircle, Bell, User, LogOut } from 'lucide-react';
 import { Container } from '@/components/common/Container';
 import { Button } from '@/components/common/Button';
@@ -6,6 +6,24 @@ import { Button } from '@/components/common/Button';
 const DashboardNavbar = () => {
   const location = useLocation(); // 2. Ambil data lokasi/URL saat ini
   const currentPath = location.pathname; // 3. Simpan path saat ini
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Konfirmasi keluar
+    if (window.confirm('Anda yakin ingin keluar?')) {
+      try {
+        // Hapus kemungkinan token / user data dari storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+      } catch (e) {
+        // ignore
+      }
+      // Arahkan ke halaman login
+      navigate('/login');
+    }
+  };
   
   // 4. Ubah logika 'active' menjadi dinamis (membandingkan path)
   const menus = [
@@ -89,6 +107,7 @@ const DashboardNavbar = () => {
             <Button 
               variant="outline" 
               className="border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 h-9 px-4 text-sm gap-2"
+              onClick={handleLogout}
             >
               <LogOut size={16} />
               Keluar

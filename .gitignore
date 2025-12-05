@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 technical_spec_reviews.md
 walkthrough_reviews.md
+
+# Local Env Files
+.env
+.env.local
+.env.*.local
