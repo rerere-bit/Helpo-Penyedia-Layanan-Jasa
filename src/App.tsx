@@ -1,11 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-
-// Import Component Penjaga
 import ProtectedRoute from './components/layout/ProtectedRoute';
-
-// Import Halaman (Path disesuaikan agar tidak error di preview)
-// Di local Anda, tetap gunakan '@/pages/...' jika itu settingan Anda
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -28,6 +23,7 @@ import HelpPage from './pages/HelpPage';
 import ProviderDashboard from './pages/provider/ProviderDashboard';
 import ProviderOrdersPage from './pages/provider/ProviderOrdersPage';
 import ProviderServicesPage from './pages/provider/ProviderServicesPage';
+import ProviderSettingsPage from './pages/provider/ProviderSettingsPage';
 
 function App() {
   const { loading } = useAuth();
@@ -165,6 +161,12 @@ function App() {
         <Route path="/provider/*" element={
           <ProtectedRoute onlyProvider={true}>
             <ProviderDashboard />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/provider/settings" element={
+          <ProtectedRoute onlyProvider={true}>
+            <ProviderSettingsPage />
           </ProtectedRoute>
         } />
 

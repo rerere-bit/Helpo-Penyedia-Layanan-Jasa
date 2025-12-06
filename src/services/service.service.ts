@@ -1,28 +1,29 @@
 import { 
-  collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc, serverTimestamp 
+  collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc, serverTimestamp
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../lib/firebase";
+import { db } from "../lib/firebase"; // Hapus import 'storage' karena kita pakai link manual
 import type { Service, ServiceInput } from "@/types";
 
 const COLLECTION_NAME = "services";
 
+// --- CRUD ---
+
 export const addService = async (providerId: string, input: ServiceInput) => {
   try {
-    const randomImage = `https://source.unsplash.com/random/800x600/?${input.category},service`;
-
-    // Data yang akan masuk ke Firestore
     const newService = {
       providerId,
       title: input.title,
       category: input.category,
       description: input.description,
       price: Number(input.price),
-      thumbnailUrl: randomImage,
-      isActive: true, // Default aktif saat dibuat
+      
+      // [UBAH] Langsung pakai URL dari input, atau default jika kosong
+      thumbnailUrl: input.thumbnailUrl || "https://placehold.co/600x400?text=Layanan",
+      
+      isActive: true,
       rating: 0,
       reviewCount: 0,
-      createdAt: serverTimestamp(), // Menggunakan waktu server
+      createdAt: serverTimestamp(),
     };
 
     await addDoc(collection(db, COLLECTION_NAME), newService);
@@ -32,16 +33,37 @@ export const addService = async (providerId: string, input: ServiceInput) => {
   }
 };
 
+// [BARU] Fungsi Update Service
+export const updateService = async (serviceId: string, input: Partial<ServiceInput>) => {
+  try {
+    const serviceRef = doc(db, COLLECTION_NAME, serviceId);
+    
+    // Kita buat object update dinamis (hanya field yang dikirim yang diupdate)
+    const updateData: any = {
+      title: input.title,
+      category: input.category,
+      description: input.description,
+      price: Number(input.price),
+      updatedAt: serverTimestamp()
+    };
+
+    // Jika user memasukkan URL baru, update. Jika tidak, biarkan yang lama.
+    if (input.thumbnailUrl) {
+      updateData.thumbnailUrl = input.thumbnailUrl;
+    }
+
+    await updateDoc(serviceRef, updateData);
+    return true;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
 export const getProviderServices = async (providerId: string): Promise<Service[]> => {
   try {
-    // Query: Ambil services diman providerId == UID user yang login
     const q = query(collection(db, COLLECTION_NAME), where("providerId", "==", providerId));
     const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Service));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
   } catch (error: any) {
     throw new Error(error.message);
   }
