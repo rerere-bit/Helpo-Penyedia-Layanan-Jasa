@@ -1,24 +1,60 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
-import { Card } from '@/components/common/Card';
-import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
-import { User, Briefcase } from 'lucide-react';
+import { User, Briefcase, AlertCircle, Clock, Eye, EyeOff } from 'lucide-react';
+
+// Menggunakan RELATIVE PATH agar aman
+import MainLayout from '../components/layout/MainLayout';
+import { Card } from '../components/common/Card';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { registerUser } from '../services/auth.service';
 
 const RegisterPage = () => {
+  // 1. STATE: Variable untuk menampung input user
   const [role, setRole] = useState<'customer' | 'provider'>('customer');
-  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // State untuk UX (Loading & Error message)
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
+  const navigate = useNavigate();
+
+  // 2. LOGIC: Fungsi ini jalan saat form disubmit
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault(); 
     setIsLoading(true);
-    // Simulasi register
-    setTimeout(() => {
+    setError(''); 
+
+    try {
+      // Panggil fungsi Backend
+      await registerUser({
+        email: email,
+        pass: password,
+        name: name,
+        role: role
+      });
+
+      // Redirect sukses
+      if (role === 'provider') {
+        navigate('/provider/dashboard'); 
+      } else {
+        navigate('/services');
+      }
+
+    } catch (err: any) {
+      console.error("Register Error:", err);
+      let message = err.message;
+      if (message.includes("email-already-in-use")) message = "Email ini sudah terdaftar.";
+      if (message.includes("weak-password")) message = "Password terlalu lemah (min 6 karakter).";
+      
+      setError(message);
+    } finally {
       setIsLoading(false);
-      navigate('/services'); 
-    }, 1500);
+    }
   };
 
   return (
@@ -28,7 +64,7 @@ const RegisterPage = () => {
           
           <div className="flex justify-center mb-4">
             <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-blue-200 shadow-lg">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <Clock size={20} />
             </div>
           </div>
 
@@ -40,6 +76,14 @@ const RegisterPage = () => {
               Daftar
             </button>
           </div>
+
+          {/* Menampilkan Error Alert jika ada error */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg flex items-center gap-2">
+              <AlertCircle size={16} />
+              {error}
+            </div>
+          )}
 
           <form className="space-y-5" onSubmit={handleRegister}>
             
@@ -63,9 +107,43 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            <Input label="Nama Lengkap" type="text" placeholder="John Doe" required />
-            <Input label="Email" type="email" placeholder="nama@email.com" required />
-            <Input label="Password" type="password" placeholder="••••••••" required />
+            <Input 
+              label="Nama Lengkap" 
+              type="text" 
+              placeholder="John Doe" 
+              required 
+              value={name}
+              onChange={(e: any) => setName(e.target.value)}
+            />
+            
+            <Input 
+              label="Email" 
+              type="email" 
+              placeholder="nama@email.com" 
+              required 
+              value={email}
+              onChange={(e: any) => setEmail(e.target.value)}
+            />
+            
+            <div className="relative">
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={(e: any) => setPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute bottom-3 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
 
             <Button type="submit" variant="primary" fullWidth className="mt-2" disabled={isLoading}>
               {isLoading ? 'Memproses...' : 'Daftar'}
