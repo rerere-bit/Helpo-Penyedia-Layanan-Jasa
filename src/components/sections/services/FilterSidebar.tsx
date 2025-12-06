@@ -54,27 +54,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilter
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
       </div>
-
-      {/* Kategori */}
-      <div className="mb-6">
-        <label className="block text-xs font-semibold text-gray-500 mb-2">Kategori</label>
-        <div className="relative">
-          <select 
-            value={filters.category}
-            onChange={(e) => handleChange('category', e.target.value)}
-            className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer"
-          >
-            <option value="Semua">Semua Kategori</option>
-            <option value="Pembersihan">Pembersihan</option>
-            <option value="Perbaikan">Perbaikan</option>
-            <option value="Listrik">Listrik</option>
-            <option value="Taman">Taman</option>
-            <option value="Cat">Cat & Renovasi</option>
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-        </div>
-      </div>
-
+      
       {/* Lokasi */}
       <div className="mb-8">
         <label className="block text-xs font-semibold text-gray-500 mb-2">Lokasi</label>
