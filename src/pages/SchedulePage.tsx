@@ -1,70 +1,30 @@
-import { useState, useMemo } from 'react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addDays } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, MapPin, Clock, CalendarX, BellRing } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
+import { ChevronLeft, ChevronRight, MapPin, Clock, CalendarX, BellRing, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Container } from '@/components/common/Container';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 
-// Tipe Data Jadwal
-interface ScheduleItem {
-  id: number;
-  status: 'Dikonfirmasi' | 'Menunggu' | 'Selesai';
-  title: string;
-  date: Date; // Menggunakan Date object agar presisi
-  time: string;
-  address: string;
-  price: number;
-}
-
-// MOCK DATA DINAMIS (Menggunakan tanggal hari ini agar selalu relevan saat Anda mencoba)
-const today = new Date();
-const SCHEDULES_DATA: ScheduleItem[] = [
-  { 
-    id: 1, 
-    status: 'Dikonfirmasi', 
-    title: 'Pembersihan Rumah Premium', 
-    date: today, // Hari ini
-    time: '10:00 - 13:00', 
-    address: 'Jl. Sudirman No. 123, Jakarta', 
-    price: 250000 
-  },
-  { 
-    id: 2, 
-    status: 'Dikonfirmasi', 
-    title: 'Perbaikan AC 1PK', 
-    date: addDays(today, 2), // 2 hari lagi
-    time: '14:00 - 16:00', 
-    address: 'Jl. Thamrin No. 45, Jakarta', 
-    price: 150000 
-  },
-  { 
-    id: 3, 
-    status: 'Menunggu', 
-    title: 'Service Instalasi Listrik', 
-    date: addDays(today, 5), // 5 hari lagi
-    time: '09:00 - 11:00', 
-    address: 'Jl. Gatot Subroto No. 78, Jakarta', 
-    price: 200000 
-  },
-  { 
-    id: 4, 
-    status: 'Selesai', 
-    title: 'Cuci Mobil Home Service', 
-    date: subMonths(today, 1), // Bulan lalu (untuk tes navigasi bulan)
-    time: '08:00 - 09:00', 
-    address: 'Komplek Permata Hijau', 
-    price: 50000 
-  },
-];
+// Backend Imports
+import { useAuth } from '@/context/AuthContext';
+import { getOrders } from '@/services/order.service';
+import type { Order } from '@/types';
 
 const SchedulePage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // State UI
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isReminderOn, setIsReminderOn] = useState(true);
-  const navigate = useNavigate();
+  
+  // State Data
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Helper: Format Rupiah
   const formatRupiah = (price: number) => {
@@ -74,19 +34,45 @@ const SchedulePage = () => {
   // Helper: Warna Badge Status
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Dikonfirmasi': return 'bg-blue-100 text-blue-700';
-      case 'Menunggu': return 'bg-yellow-100 text-yellow-700';
-      case 'Selesai': return 'bg-green-100 text-green-700';
+      case 'confirmed': return 'bg-blue-100 text-blue-700'; // Dikonfirmasi
+      case 'pending': return 'bg-yellow-100 text-yellow-700'; // Menunggu Bayar
+      case 'in_progress': return 'bg-purple-100 text-purple-700'; // Sedang Dikerjakan
+      case 'completed': return 'bg-green-100 text-green-700'; // Selesai
       default: return 'bg-gray-100 text-gray-700';
     }
   };
 
-  // LOGIKA FILTERING: Ambil jadwal yang cocok dengan tanggal yang dipilih
-  const selectedSchedules = useMemo(() => {
-    return SCHEDULES_DATA.filter(item => isSameDay(item.date, selectedDate));
-  }, [selectedDate]);
+  // --- 1. Fetch Orders dari Firebase ---
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (!user) return;
+      try {
+        // Ambil semua order kecuali yang dibatalkan
+        const data = await getOrders(user.uid, 'customer');
+        // Filter lokal untuk membuang yang cancelled (opsional, tergantung kebutuhan)
+        const activeOrders = data.filter(o => o.status !== 'cancelled');
+        setOrders(activeOrders);
+      } catch (error) {
+        console.error("Gagal memuat jadwal:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // LOGIKA KALENDER
+    fetchSchedule();
+  }, [user]);
+
+  // --- 2. Filter Jadwal Harian (Berdasarkan Tanggal yang Dipilih) ---
+  const selectedSchedules = useMemo(() => {
+    return orders.filter(order => {
+      // Pastikan bookingDate ada dan valid
+      if (!order.bookingDate) return false;
+      const orderDate = new Date(order.bookingDate);
+      return isSameDay(orderDate, selectedDate);
+    });
+  }, [orders, selectedDate]);
+
+  // --- 3. Render Kalender ---
   const renderCalendar = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
@@ -96,7 +82,7 @@ const SchedulePage = () => {
 
     return (
       <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center text-sm mb-4">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+        {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(d => (
           <div key={d} className="text-gray-400 font-medium text-xs uppercase tracking-wider">{d}</div>
         ))}
         
@@ -104,8 +90,11 @@ const SchedulePage = () => {
           const isSelected = isSameDay(dayItem, selectedDate);
           const isCurrentMonth = isSameMonth(dayItem, monthStart);
           
-          // Cek apakah ada jadwal di tanggal ini (Logika diperbaiki: Cek tanggal penuh, bukan cuma tanggalnya saja)
-          const hasSchedule = SCHEDULES_DATA.some(item => isSameDay(item.date, dayItem));
+          // Cek apakah ada jadwal di tanggal ini
+          const hasSchedule = orders.some(order => {
+             if (!order.bookingDate) return false;
+             return isSameDay(new Date(order.bookingDate), dayItem);
+          });
 
           return (
             <button
@@ -119,7 +108,7 @@ const SchedulePage = () => {
             >
               {format(dayItem, 'd')}
               
-              {/* Dot Indikator Biru (Hanya muncul jika ada jadwal & tidak sedang dipilih) */}
+              {/* Dot Indikator Biru */}
               {hasSchedule && !isSelected && (
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full ring-2 ring-white"></span>
               )}
@@ -171,7 +160,7 @@ const SchedulePage = () => {
                   <ChevronLeft size={20} />
                 </button>
                 <span className="font-bold text-lg text-gray-900 capitalize">
-                  {format(currentMonth, 'MMMM yyyy', { locale: id })}
+                  {format(currentMonth, 'MMMM yyyy', { locale: localeId })}
                 </span>
                 <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
                   <ChevronRight size={20} />
@@ -193,55 +182,58 @@ const SchedulePage = () => {
             {/* Kanan: List Pesanan (Dinamis) */}
             <div className="lg:w-2/3 w-full space-y-4">
               <div className="flex justify-between items-end mb-2">
-                <h3 className="font-bold text-gray-900 text-lg">
-                  Jadwal: {format(selectedDate, 'dd MMMM yyyy', { locale: id })}
+                <h3 className="font-bold text-gray-900 text-lg capitalize">
+                  Jadwal: {format(selectedDate, 'dd MMMM yyyy', { locale: localeId })}
                 </h3>
                 <span className="text-sm text-gray-500">{selectedSchedules.length} layanan</span>
               </div>
 
-              {selectedSchedules.length > 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
+              ) : selectedSchedules.length > 0 ? (
                 selectedSchedules.map((item) => (
                   <Card key={item.id} className="p-6 flex flex-col md:flex-row justify-between items-start gap-4 hover:border-primary transition-colors group">
-                     <div className="space-y-3 flex-1">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${getStatusColor(item.status)}`}>
-                          {item.status}
-                        </span>
-                        <h4 className="font-bold text-gray-900 text-xl group-hover:text-primary transition-colors">
-                          {item.title}
-                        </h4>
-                        <div className="space-y-2 text-sm text-gray-500">
-                           <div className="flex items-center gap-2.5">
-                              <Clock size={16} className="text-primary" /> 
-                              <span className="font-medium text-gray-700">{item.time}</span>
-                           </div>
-                           <div className="flex items-start gap-2.5">
-                              <MapPin size={16} className="text-gray-400 mt-0.5" /> 
-                              <span>{item.address}</span>
-                           </div>
-                        </div>
-                     </div>
-                     <div className="text-right flex flex-col items-end justify-between self-stretch">
-                        <span className="font-bold text-primary text-xl">{formatRupiah(item.price)}</span>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-4"
-                          onClick={() => navigate(`/order/${item.id}`)} // <--- TAMBAHKAN INI
-                        >
-                          Detail Pesanan
-                        </Button>
-                     </div>
+                      <div className="space-y-3 flex-1">
+                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${getStatusColor(item.status)}`}>
+                           {item.status === 'pending' ? 'Menunggu Bayar' : item.status}
+                         </span>
+                         <h4 className="font-bold text-gray-900 text-xl group-hover:text-primary transition-colors">
+                           {item.serviceSnapshot?.title || "Layanan"}
+                         </h4>
+                         <div className="space-y-2 text-sm text-gray-500">
+                            <div className="flex items-center gap-2.5">
+                               <Clock size={16} className="text-primary" /> 
+                               <span className="font-medium text-gray-700">{item.bookingTime}</span>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                               <MapPin size={16} className="text-gray-400 mt-0.5" /> 
+                               {/* Gunakan data customer snapshot atau user profile */}
+                               <span>{item.customerSnapshot?.address || "Alamat belum diatur"}</span>
+                            </div>
+                         </div>
+                      </div>
+                      <div className="text-right flex flex-col items-end justify-between self-stretch">
+                         <span className="font-bold text-primary text-xl">{formatRupiah(item.totalPrice)}</span>
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="mt-4"
+                           onClick={() => navigate(`/order/${item.id}`)}
+                         >
+                           Detail Pesanan
+                         </Button>
+                      </div>
                   </Card>
                 ))
               ) : (
-                // Empty State jika tidak ada jadwal di tanggal terpilih
+                // Empty State
                 <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center">
                   <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CalendarX size={32} />
                   </div>
                   <h3 className="font-bold text-gray-900 text-lg mb-1">Tidak ada jadwal</h3>
                   <p className="text-gray-500">Anda tidak memiliki layanan terjadwal pada tanggal ini.</p>
-                  <Button className="mt-6" onClick={() => window.location.href='/services'}>
+                  <Button className="mt-6" onClick={() => navigate('/services')}>
                     Cari Layanan Baru
                   </Button>
                 </div>
