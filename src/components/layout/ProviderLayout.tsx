@@ -1,12 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProviderSidebar from './ProviderSidebar';
 import { Bell, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '@/context/AuthContext';
+import { getUserNotifications } from '@/services/notification.service';
 
 interface Props {
   children: React.ReactNode;
 }
 
 const ProviderLayout: React.FC<Props> = ({ children }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch jumlah notifikasi belum dibaca
+  useEffect(() => {
+    const fetchUnread = async () => {
+      if (user) {
+        try {
+          const notifs = await getUserNotifications(user.uid);
+          const count = notifs.filter(n => !n.isRead).length;
+          setUnreadCount(count);
+        } catch (e) {
+          console.error("Failed to fetch notif count", e);
+        }
+      }
+    };
+    fetchUnread();
+  }, [user]);
+
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       
@@ -28,15 +51,21 @@ const ProviderLayout: React.FC<Props> = ({ children }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+            {/* Tombol Notifikasi Aktif */}
+            <button 
+              onClick={() => navigate('/provider/notifications')}
+              className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+            >
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              )}
             </button>
           </div>
         </header>
 
         {/* Dynamic Content */}
-        <main className="p-4 lg:p-8 flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
 
