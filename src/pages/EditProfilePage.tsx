@@ -165,7 +165,7 @@ const EditProfilePage = () => {
               {/* Foto Profil */}
               <div className="flex flex-col items-center mb-8 border-b border-gray-100 pb-8">
                 <div className="relative mb-4 group cursor-pointer">
-                  <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg overflow-hidden group-hover:opacity-90 transition-opacity">
+                  <div className="w-24 h-24 bg-blue-800 rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg overflow-hidden group-hover:opacity-90 transition-opacity">
                     {imagePreview ? (
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
