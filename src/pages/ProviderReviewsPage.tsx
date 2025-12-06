@@ -76,7 +76,7 @@ const ProviderReviewsPage = () => {
                 key={star}
                 onClick={() => setFilterRating(star)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center gap-1 transition-colors ${
-                  filterRating === star ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                  filterRating === star ? 'bg-blue-800 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Star size={14} fill="currentColor" className={filterRating === star ? 'text-white' : 'text-yellow-400'} />
