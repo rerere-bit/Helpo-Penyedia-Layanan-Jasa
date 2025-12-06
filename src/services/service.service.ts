@@ -3,7 +3,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../lib/firebase";
-import { Service, ServiceInput } from "../types";
+import type { Service, ServiceInput } from "@/types";
 
 const COLLECTION_NAME = "services";
 
