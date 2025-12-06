@@ -18,14 +18,14 @@
 //   };
 // }
 
-// export interface FilterState {
-//   keyword: string;
-//   category: string;
-//   location: string;
-//   minPrice: number;
-//   maxPrice: number;
-//   minRating: number;
-// }
+export interface FilterState {
+  keyword: string;
+  category: string;
+  location: string;
+  minPrice: number;
+  maxPrice: number;
+  minRating: number;
+}
 
 export interface Service {
   id: string;
