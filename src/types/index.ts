@@ -1,22 +1,4 @@
-// src/types/index.ts
-
-// export interface Service {
-//   id: string;
-//   providerId: string; // Relasi ke Users
-//   title: string;
-//   category: string;
-//   price: number;
-//   rating: number;
-//   reviewCount: number;
-//   description: string;
-//   thumbnailUrl: string;
-//   provider: {
-//     name: string;
-//     location: string;
-//     avatarUrl?: string;
-//     isVerified: boolean;
-//   };
-// }
+// --- TIPE DATA UMUM ---
 
 export interface FilterState {
   keyword: string;
@@ -27,45 +9,106 @@ export interface FilterState {
   minRating: number;
 }
 
+export interface Category {
+  id: string;
+  label: string;
+  icon?: string;
+}
+
+// --- TIPE DATA UTAMA (SERVICE) ---
+
 export interface Service {
   id: string;
-  providerId: string; // Relasi ke Users
   title: string;
   category: string;
   description: string;
   price: number;
   thumbnailUrl: string;
-  isActive: boolean;
   rating: number;
   reviewCount: number;
-  createdAt: string; 
+
+  // --- Field Flexible (Optional) ---
+  // Kita buat optional (?) agar tidak error saat salah satu belum tersedia
+  
+  // Field Backend (Raw)
+  providerId?: string;
+  isActive?: boolean;
+  createdAt?: string | any; // Bisa string ISO atau Firestore Timestamp
+
+  // Field Frontend (UI Display)
+  // Kita wajibkan ada object 'provider', tapi isinya boleh partial jika data belum lengkap
+  provider: {
+    name: string;
+    location: string;
+    avatarUrl?: string;
+    isVerified: boolean;
+  };
 }
 
-// Tipe data untuk input form tambah jasa
+// Input saat membuat jasa baru
 export interface ServiceInput {
   title: string;
   category: string;
   description: string;
   price: number;
-  imageFile: File;
+  imageFile?: File | null;
+  thumbnailUrl?: string; // Support manual URL
 }
 
-export interface Category {
-  id: string; 
-  label: string; 
+// --- TIPE DATA TRANSAKSI (ORDER & NOTIF) ---
+
+export type OrderStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface Order {
+  id: string;
+  customerId: string;
+  providerId: string;
+  serviceId: string;
+  
+  // Snapshot Data
+  serviceSnapshot: {
+    title: string;
+    price: number;
+    thumbnailUrl: string;
+    category: string;
+  };
+  customerSnapshot: {
+    displayName: string;
+    phoneNumber: string;
+    address: string;
+  };
+
+  bookingDate: string;
+  bookingTime: string;
+  notes?: string;
+  
+  status: OrderStatus;
+  totalPrice: number;
+  createdAt: string;
 }
 
-// Tambahkan di bawah yang sudah ada
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  isRead: boolean;
+  createdAt: string;
+}
+
+// --- TIPE DATA REVIEW ---
+
 export interface Review {
   id: string;
   serviceId: string;
   providerId: string;
   userId: string;
-  userName: string; 
+  userName: string;
   userAvatar?: string;
-  rating: number; 
+  rating: number;
   comment: string;
-  createdAt: string;
+  createdAt: string | any;
 }
 
 export interface ReviewInput {

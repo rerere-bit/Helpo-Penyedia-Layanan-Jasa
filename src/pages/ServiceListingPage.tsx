@@ -1,22 +1,21 @@
-// src/pages/ServiceListingPage.tsx
-
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom'; 
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Container } from '@/components/common/Container';
 import { ServiceCard } from '@/components/sections/services/ServiceCard';
 import { FilterSidebar } from '@/components/sections/services/FilterSidebar';
 import { Search, SlidersHorizontal, Database, Loader2 } from 'lucide-react';
 
-// Import Logic Backend
+// Import Logic Backend & Types
 import { MarketService } from '@/services/market.service';
-// Import Tipe Backend (Alias agar tidak bentrok dengan tipe Frontend)
-import type { Service as BackendService } from '@/types/market'; 
-import type { Service as FrontendService, FilterState } from '@/types';
+import { getCategories } from '@/services/category.service';
+import type { Service as FrontendService, FilterState, Category } from '@/types'; 
 
 const ServiceListingPage = () => {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
-  const [dbServices, setDbServices] = useState<FrontendService[]>([]); // Data dari Firebase
+  
+  // State Data
+  const [dbServices, setDbServices] = useState<FrontendService[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]); 
   const [loading, setLoading] = useState(true);
 
   // State Filter Utama
@@ -31,50 +30,54 @@ const ServiceListingPage = () => {
 
   // --- 1. FETCH DATA DARI FIREBASE ---
   useEffect(() => {
-    fetchServices();
+    const initData = async () => {
+      setLoading(true);
+      try {
+        const [rawServices, fetchedCategories] = await Promise.all([
+          MarketService.getServices(),
+          getCategories()
+        ]);
+
+        setCategories(fetchedCategories);
+
+        // TRANSFORMASI DATA (Mapping Manual agar Tipe Data Cocok)
+        // Kita paksa tipe 'any' pada input map agar TypeScript tidak rewel soal field yang hilang
+        const mappedData: FrontendService[] = rawServices.map((item: any) => ({
+          id: item.id || 'unknown',
+          title: item.title || "Layanan Tanpa Judul",
+          category: item.category || "Umum",
+          price: Number(item.price) || 0,
+          rating: Number(item.rating) || 0,
+          reviewCount: Number(item.reviewCount) || 0,
+          description: item.description || "Deskripsi tidak tersedia.",
+          thumbnailUrl: item.thumbnailUrl || "https://placehold.co/400x300?text=No+Image",
+          
+          // PENTING: Membentuk object provider secara manual
+          // Karena di database 'location' ada di root, tapi di frontend diminta di dalam 'provider'
+          provider: { 
+            name: 'Mitra Helpo', // Placeholder (karena kita belum join tabel user)
+            location: item.location || "Indonesia", 
+            avatarUrl: "",
+            isVerified: true 
+          }
+        }));
+
+        setDbServices(mappedData);
+      } catch (error) {
+        console.error("Gagal load data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initData();
   }, []);
 
-  const fetchServices = async () => {
-    setLoading(true);
-    try {
-      // Ambil data mentah dari Firestore
-      const rawData = await MarketService.getServices();
-      console.log("DEBUG: Data mentah dari Firestore:", rawData); // Cek Console Browser
-      
-      // TRANSFORMASI DATA: Backend Type -> Frontend Type
-      // MENGGUNAKAN FALLBACK VALUES (||) AGAR TIDAK CRASH JIKA DATA KOTOR
-      const mappedData: FrontendService[] = rawData.map((item: BackendService) => ({
-        id: item.id || 'unknown',
-        title: item.title || "Layanan Tanpa Judul",
-        category: item.category || "Umum",
-        price: item.price || 0,
-        rating: item.rating || 0,
-        reviewCount: item.reviewCount || 0,
-        description: item.description || "Deskripsi tidak tersedia.",
-        thumbnailUrl: item.thumbnailUrl || "https://placehold.co/400x300?text=No+Image",
-        
-        // Mocking Provider Object (PENTING: Handle location kosong)
-        provider: { 
-          name: 'Mitra Helpo', 
-          location: item.location || "", // Default string kosong agar filter aman
-          isVerified: true 
-        }
-      }));
-
-      setDbServices(mappedData);
-    } catch (error) {
-      console.error("Gagal load data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // --- 2. SEED DATA FUNCTION (Tombol Rahasia) ---
+  // --- 2. SEED DATA FUNCTION ---
   const handleSeedData = async () => {
     if(!confirm("Isi database dengan data dummy?")) return;
     setLoading(true);
     try {
-      // Contoh data dummy 1
       await MarketService.createService({
         providerId: "prov_001",
         title: "Cuci AC Split 1 PK",
@@ -85,19 +88,7 @@ const ServiceListingPage = () => {
         isActive: true,
         location: "Jakarta Selatan"
       });
-      // Contoh data dummy 2
-      await MarketService.createService({
-        providerId: "prov_002",
-        title: "Service Kulkas 2 Pintu",
-        category: "Electronic",
-        description: "Perbaikan kulkas tidak dingin, ganti freon.",
-        price: 150000,
-        thumbnailUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80",
-        isActive: true,
-        location: "Bandung"
-      });
-      
-      await fetchServices(); // Refresh data
+      window.location.reload();
       alert("Data berhasil ditambahkan!");
     } catch (e) {
       alert("Gagal seed data");
@@ -107,13 +98,15 @@ const ServiceListingPage = () => {
     }
   };
 
-  // --- 3. LOGIKA FILTERING (Client Side) ---
+  // --- 3. LOGIKA FILTERING ---
   const filteredServices = useMemo(() => {
     return dbServices.filter(service => {
-      // Safety Variable (Cegah Crash null/undefined)
+      // Ambil data dengan aman (Optional Chaining)
       const sTitle = service.title || "";
       const sDesc = service.description || "";
-      const sLoc = service.provider.location || "";
+      
+      // PERBAIKAN: Akses location lewat provider object yang sudah kita mapping di atas
+      const sLoc = service.provider?.location || ""; 
 
       const matchKeyword = 
         sTitle.toLowerCase().includes(filters.keyword.toLowerCase()) || 
@@ -121,7 +114,6 @@ const ServiceListingPage = () => {
 
       const matchCategory = filters.category === 'Semua' || service.category === filters.category;
       
-      // Pencocokan lokasi (Case Insensitive & Partial Match)
       const matchLocation = filters.location === 'Semua' || sLoc.toLowerCase().includes(filters.location.toLowerCase());
       
       const matchPrice = service.price <= filters.maxPrice && service.price >= filters.minPrice;
@@ -134,9 +126,8 @@ const ServiceListingPage = () => {
   return (
     <DashboardLayout>
       <Container>
-        {/* Header & Search */}
+        {/* Header & Seed Button */}
         <div className="flex justify-between items-center mb-4">
-           {/* Tombol Seed Data (Development Only) */}
            <button 
               onClick={handleSeedData}
               className="flex items-center gap-2 text-xs text-gray-400 hover:text-blue-600 border border-dashed border-gray-300 px-3 py-1 rounded"
@@ -146,6 +137,7 @@ const ServiceListingPage = () => {
            </button>
         </div>
 
+        {/* Search Bar */}
         <div className="relative mb-8">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input 
@@ -157,6 +149,7 @@ const ServiceListingPage = () => {
           />
         </div>
 
+        {/* Mobile Filter Toggle */}
         <div className="lg:hidden mb-6">
           <button 
             onClick={() => setShowMobileFilter(!showMobileFilter)}
@@ -168,16 +161,16 @@ const ServiceListingPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* Sidebar Filter dengan Props Categories */}
+          {/* Sidebar Filter */}
           <aside className={`lg:block w-72 shrink-0 ${showMobileFilter ? 'block' : 'hidden'}`}>
             <FilterSidebar 
               filters={filters} 
               setFilters={setFilters} 
-              categories={categories} // <-- Pass Data Kategori
+              categories={categories}
             />
           </aside>
 
-          {/* Grid Content (Sama) */}
+          {/* Grid Content */}
           <div className="flex-1 w-full">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-gray-500 font-medium">
@@ -193,7 +186,6 @@ const ServiceListingPage = () => {
             ) : filteredServices.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredServices.map((service) => (
-                  // Pastikan ServiceCard menerima data sesuai tipe FrontendService
                   <ServiceCard key={service.id} data={service} />
                 ))}
               </div>

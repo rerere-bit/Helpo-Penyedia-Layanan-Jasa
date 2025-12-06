@@ -2,99 +2,113 @@ import { useState, useEffect } from 'react';
 import ProviderLayout from '@/components/layout/ProviderLayout';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
-import { Plus, Edit2, Trash2, Star, Eye, MoreVertical, X, Loader2 } from 'lucide-react';
-import { MarketService } from '@/services/market.service';
-import { type Service, type Category } from '@/types/market';
+import { Input } from '@/components/common/Input';
+import { Plus, Edit2, Trash2, MoreVertical, X, Loader2, Star, Eye } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-// ID Provider Sementara (Simulasi Login)
-const CURRENT_PROVIDER_ID = "prov_001"; // Pastikan sama dengan yang dipakai saat seed data
+// Import Services yang sudah kita buat
+import { getProviderServices, addService, deleteService, toggleServiceStatus } from '@/services/service.service';
+import { getCategories } from '@/services/category.service';
+import type { Service, Category } from '@/types';
 
 const ProviderServicesPage = () => {
+  const { user } = useAuth();
+  
   // State Data
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   // State Modal & Form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    price: 0,
-    description: '',
-    thumbnailUrl: '',
-    location: 'Jakarta Selatan' 
+    title: '', category: '', description: '', price: ''
   });
 
-  // 1. Load Data dari Firebase
+  // 1. Fetch Data (Services & Categories) saat halaman dimuat
   useEffect(() => {
-    loadData();
-  }, []);
+    const initData = async () => {
+      if (!user) return;
+      setIsLoading(true);
+      try {
+        // Jalankan kedua request secara paralel agar cepat
+        const [fetchedServices, fetchedCategories] = await Promise.all([
+          getProviderServices(user.uid),
+          getCategories()
+        ]);
+        
+        setServices(fetchedServices);
+        setCategories(fetchedCategories);
+        
+        // Set default category jika ada data
+        if (fetchedCategories.length > 0) {
+          setFormData(prev => ({ ...prev, category: fetchedCategories[0].label }));
+        }
+      } catch (error) {
+        console.error("Gagal memuat data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [cats, myServices] = await Promise.all([
-        MarketService.getCategories(),
-        MarketService.getProviderServices(CURRENT_PROVIDER_ID)
-      ]);
-      setCategories(cats.length ? cats : [{id: 'Umum', label: 'Umum', icon: 'box'}]);
-      setServices(myServices);
-    } catch (error) {
-      console.error("Gagal memuat data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    initData();
+  }, [user]);
 
-  // 2. Logic: Submit Data Baru
-  const handleSubmit = async (e: React.FormEvent) => {
+  // 2. Handle Tambah Service
+  const handleAddService = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+
     setIsSubmitting(true);
     try {
-      await MarketService.createService({
+      await addService(user.uid, {
         ...formData,
-        providerId: CURRENT_PROVIDER_ID,
-        isActive: true
+        price: Number(formData.price),
+        // Kita kirim null karena pakai workaround gambar random (masalah billing storage)
+        imageFile: null as any 
       });
+      
       setIsModalOpen(false);
-      resetForm();
-      loadData(); // Refresh list
-      alert("Layanan berhasil ditambahkan!");
+      // Reset Form
+      setFormData({ 
+        title: '', 
+        category: categories[0]?.label || '', 
+        description: '', 
+        price: '' 
+      });
+      
+      // Refresh Data Services saja
+      const updatedServices = await getProviderServices(user.uid);
+      setServices(updatedServices);
+      
     } catch (error) {
-      alert("Gagal menyimpan layanan.");
+      alert('Gagal menambah jasa');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({ title: '', category: '', price: 0, description: '', thumbnailUrl: '', location: 'Jakarta Selatan' });
-  };
-
-  // 3. Logic: Toggle Status (Aktif/Mati)
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-    // Optimistic Update (Ubah UI duluan biar cepat)
-    const oldServices = [...services];
-    setServices(services.map(s => s.id === id ? { ...s, isActive: !currentStatus } : s));
-
-    try {
-      await MarketService.toggleServiceStatus(id, !currentStatus);
-    } catch (error) {
-      setServices(oldServices); // Revert jika gagal
-      alert("Gagal mengubah status.");
+  // 3. Handle Hapus
+  const handleDelete = async (id: string) => {
+    if (confirm('Yakin ingin menghapus jasa ini?')) {
+      await deleteService(id);
+      // Optimistic update: Hapus dari state langsung tanpa fetch ulang
+      setServices(prev => prev.filter(s => s.id !== id));
     }
   };
 
-  // 4. Logic: Delete Service
-  const handleDelete = async (id: string) => {
-    if(!confirm("Yakin ingin menghapus layanan ini?")) return;
+  // 4. Handle Toggle Status
+  const handleToggle = async (id: string, currentStatus: boolean) => {
+    // Optimistic update UI dulu
+    setServices(prev => prev.map(s => s.id === id ? { ...s, isActive: !currentStatus } : s));
+    
     try {
-      await MarketService.deleteService(id);
-      setServices(services.filter(s => s.id !== id));
+      await toggleServiceStatus(id, currentStatus);
     } catch (error) {
-      alert("Gagal menghapus layanan.");
+      // Revert jika gagal
+      setServices(prev => prev.map(s => s.id === id ? { ...s, isActive: currentStatus } : s));
+      alert("Gagal update status");
     }
   };
 
@@ -112,12 +126,12 @@ const ProviderServicesPage = () => {
             <p className="text-gray-500">Kelola daftar layanan Anda.</p>
           </div>
           <Button icon={<Plus size={18} />} onClick={() => setIsModalOpen(true)}>
-            Tambah Layanan Baru
+            Tambah Layanan
           </Button>
         </div>
 
         {/* Loading State */}
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary" size={32} /></div>
         ) : (
           /* Grid Layanan */
@@ -163,7 +177,7 @@ const ProviderServicesPage = () => {
                     <div className="flex items-center gap-1.5">
                       <Eye size={14} />
                       {/* Backend belum ada views, kita mock sementara */}
-                      <span>{Math.floor(Math.random() * 500)} views</span>
+                      <span>{service.reviewCount * 10 + 5} views</span>
                     </div>
                   </div>
 
@@ -174,7 +188,7 @@ const ProviderServicesPage = () => {
                     <div className="flex gap-2">
                       {/* Toggle Button */}
                       <button 
-                        onClick={() => handleToggleStatus(service.id!, service.isActive)}
+                        onClick={() => handleToggle(service.id!, service.isActive ?? false)}
                         title={service.isActive ? "Matikan Layanan" : "Aktifkan Layanan"}
                         className={`p-2 rounded-lg border transition-colors ${
                           service.isActive 
@@ -233,70 +247,48 @@ const ProviderServicesPage = () => {
               </div>
               
               {/* Modal Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleAddService} className="p-6 space-y-4">
+                <Input 
+                  label="Nama Layanan" 
+                  value={formData.title} 
+                  onChange={e => setFormData({...formData, title: e.target.value})} 
+                  required 
+                />
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Layanan</label>
-                  <input 
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                  <select 
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    value={formData.category}
+                    onChange={e => setFormData({...formData, category: e.target.value})}
                     required
-                    type="text" 
-                    placeholder="Contoh: Cuci AC Split 1 PK"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                    value={formData.title}
-                    onChange={e => setFormData({...formData, title: e.target.value})}
-                  />
+                  >
+                    <option value="">Pilih Kategori...</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.label}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <select 
-                      required
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                      value={formData.category}
-                      onChange={e => setFormData({...formData, category: e.target.value})}
-                    >
-                      <option value="">Pilih...</option>
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                      <option value="Cleaning">Cleaning</option>
-                      <option value="Electronic">Elektronik</option>
-                      <option value="Automotive">Otomotif</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                    <input 
-                      required
-                      type="number" 
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                      value={formData.price || ''}
-                      onChange={e => setFormData({...formData, price: Number(e.target.value)})}
-                    />
-                  </div>
-                </div>
-
+                <Input 
+                  label="Harga (Rp)" 
+                  type="number" 
+                  value={formData.price} 
+                  onChange={e => setFormData({...formData, price: e.target.value})} 
+                  required 
+                />
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                   <textarea 
-                    required
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100"
                     rows={3}
-                    placeholder="Jelaskan detail layanan..."
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Gambar (Thumbnail)</label>
-                  <input 
                     required
-                    type="url" 
-                    placeholder="https://..."
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                    value={formData.thumbnailUrl}
-                    onChange={e => setFormData({...formData, thumbnailUrl: e.target.value})}
                   />
-                  <p className="text-xs text-gray-400 mt-1">Gunakan link gambar dari Unsplash atau Google untuk demo.</p>
                 </div>
 
                 <div className="pt-4">
