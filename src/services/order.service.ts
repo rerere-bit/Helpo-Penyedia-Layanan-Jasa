@@ -192,3 +192,24 @@ export const updateOrderStatus = async (orderId: string, newStatus: OrderStatus)
     throw new Error(error.message);
   }
 };
+
+export const getOrderById = async (orderId: string): Promise<Order | null> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, orderId);
+    const snap = await getDoc(docRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      return {
+        id: snap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate().toISOString()
+      } as Order;
+    } else {
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error getOrderById:", error);
+    throw new Error(error.message);
+  }
+};
