@@ -1,7 +1,7 @@
 // src/pages/ServiceListingPage.tsx
 
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Jika dibutuhkan navigasi
+import { Link } from 'react-router-dom'; 
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Container } from '@/components/common/Container';
 import { ServiceCard } from '@/components/sections/services/ServiceCard';
@@ -25,7 +25,7 @@ const ServiceListingPage = () => {
     category: 'Semua',
     location: 'Semua',
     minPrice: 0,
-    maxPrice: 5000000, // Adjusted max price
+    maxPrice: 5000000, 
     minRating: 0
   });
 
@@ -39,22 +39,24 @@ const ServiceListingPage = () => {
     try {
       // Ambil data mentah dari Firestore
       const rawData = await MarketService.getServices();
+      console.log("DEBUG: Data mentah dari Firestore:", rawData); // Cek Console Browser
       
       // TRANSFORMASI DATA: Backend Type -> Frontend Type
-      // Kita sesuaikan struktur agar ServiceCard tidak error
+      // MENGGUNAKAN FALLBACK VALUES (||) AGAR TIDAK CRASH JIKA DATA KOTOR
       const mappedData: FrontendService[] = rawData.map((item: BackendService) => ({
         id: item.id || 'unknown',
-        title: item.title,
-        category: item.category,
-        price: item.price,
-        rating: item.rating,
-        reviewCount: item.reviewCount,
-        description: item.description,
-        thumbnailUrl: item.thumbnailUrl,
-        // Mocking Provider Object (Karena di backend baru simpan providerId)
+        title: item.title || "Layanan Tanpa Judul",
+        category: item.category || "Umum",
+        price: item.price || 0,
+        rating: item.rating || 0,
+        reviewCount: item.reviewCount || 0,
+        description: item.description || "Deskripsi tidak tersedia.",
+        thumbnailUrl: item.thumbnailUrl || "https://placehold.co/400x300?text=No+Image",
+        
+        // Mocking Provider Object (PENTING: Handle location kosong)
         provider: { 
-          name: 'Mitra Helpo', // Nanti kita ambil dari collection Users
-          location: item.location, 
+          name: 'Mitra Helpo', 
+          location: item.location || "", // Default string kosong agar filter aman
           isVerified: true 
         }
       }));
@@ -76,7 +78,7 @@ const ServiceListingPage = () => {
       await MarketService.createService({
         providerId: "prov_001",
         title: "Cuci AC Split 1 PK",
-        category: "Pembersihan", // Sesuaikan dengan filter Anda
+        category: "Cleaning", 
         description: "Pembersihan AC menyeluruh, anti bocor, garansi 30 hari.",
         price: 85000,
         thumbnailUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80",
@@ -87,7 +89,7 @@ const ServiceListingPage = () => {
       await MarketService.createService({
         providerId: "prov_002",
         title: "Service Kulkas 2 Pintu",
-        category: "Elektronik",
+        category: "Electronic",
         description: "Perbaikan kulkas tidak dingin, ganti freon.",
         price: 150000,
         thumbnailUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80",
@@ -108,21 +110,26 @@ const ServiceListingPage = () => {
   // --- 3. LOGIKA FILTERING (Client Side) ---
   const filteredServices = useMemo(() => {
     return dbServices.filter(service => {
+      // Safety Variable (Cegah Crash null/undefined)
+      const sTitle = service.title || "";
+      const sDesc = service.description || "";
+      const sLoc = service.provider.location || "";
+
       const matchKeyword = 
-        service.title.toLowerCase().includes(filters.keyword.toLowerCase()) || 
-        service.description.toLowerCase().includes(filters.keyword.toLowerCase());
+        sTitle.toLowerCase().includes(filters.keyword.toLowerCase()) || 
+        sDesc.toLowerCase().includes(filters.keyword.toLowerCase());
 
       const matchCategory = filters.category === 'Semua' || service.category === filters.category;
       
-      // Pencocokan lokasi agak loose (contains)
-      const matchLocation = filters.location === 'Semua' || service.provider.location.includes(filters.location);
+      // Pencocokan lokasi (Case Insensitive & Partial Match)
+      const matchLocation = filters.location === 'Semua' || sLoc.toLowerCase().includes(filters.location.toLowerCase());
       
       const matchPrice = service.price <= filters.maxPrice && service.price >= filters.minPrice;
       const matchRating = service.rating >= filters.minRating;
 
       return matchKeyword && matchCategory && matchLocation && matchPrice && matchRating;
     });
-  }, [filters, dbServices]); // Dependency array diupdate ke dbServices
+  }, [filters, dbServices]); 
 
   return (
     <DashboardLayout>

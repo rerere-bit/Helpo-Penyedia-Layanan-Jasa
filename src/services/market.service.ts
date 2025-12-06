@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { type Service, type Review, type Category } from '../types/market';
+import { updateDoc, deleteDoc } from 'firebase/firestore';
 
 const SERVICES_COLLECTION = 'services';
 const REVIEWS_COLLECTION = 'reviews';
@@ -150,6 +151,45 @@ export const MarketService = {
       return true;
     } catch (error) {
       console.error("Transaction failed: ", error);
+      throw error;
+    }
+  },
+
+  // 7. Ambil Jasa Khusus Provider Tertentu (Untuk Dashboard Provider)
+  getProviderServices: async (providerId: string): Promise<Service[]> => {
+    try {
+      const q = query(
+        collection(db, SERVICES_COLLECTION),
+        where('providerId', '==', providerId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+    } catch (error) {
+      console.error("Error fetching provider services:", error);
+      throw error;
+    }
+  },
+  
+  // [BARU] 8. Toggle Status Layanan (Aktif/Non-Aktif)
+  toggleServiceStatus: async (serviceId: string, isActive: boolean) => {
+    try {
+      const docRef = doc(db, SERVICES_COLLECTION, serviceId);
+      await updateDoc(docRef, { isActive });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      throw error;
+    }
+  },
+
+  // [BARU] 9. Hapus Layanan
+  deleteService: async (serviceId: string) => {
+    try {
+      const docRef = doc(db, SERVICES_COLLECTION, serviceId);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error("Error deleting service:", error);
       throw error;
     }
   }

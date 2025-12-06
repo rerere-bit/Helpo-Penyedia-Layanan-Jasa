@@ -1,16 +1,17 @@
 import { Timestamp } from 'firebase/firestore';
 
+// Pastikan ada kata 'export' di sini
 export interface Category {
-  id: string; // contoh: "cleaning", "electronic"
+  id: string; 
   label: string;
-  icon: string; // nama icon atau url
+  icon: string; 
 }
 
 export interface Service {
-  id?: string; // Optional karena saat create belum ada ID
+  id?: string;
   providerId: string;
   title: string;
-  category: string;
+  category: string; // Ini string, tapi nanti valuenya diambil dari ID Category
   description: string;
   price: number;
   thumbnailUrl: string;
@@ -27,7 +28,7 @@ export interface Review {
   serviceId: string;
   providerId: string;
   customerId: string;
-  rating: number; // 1 - 5
+  rating: number; 
   comment: string;
   createdAt: Timestamp | Date;
 }
