@@ -117,3 +117,26 @@ export interface ReviewInput {
   rating: number;
   comment: string;
 }
+
+export interface ProviderSchedule {
+  providerId: string;
+  workingDays: number[];
+  workingHours: {
+    start: string; 
+    end: string;   
+  };
+  exceptions: string[]; 
+}
+
+export type TicketStatus = 'open' | 'in_progress' | 'closed';
+
+export interface Ticket {
+  id: string;
+  userId: string;
+  category: string;
+  subject: string; 
+  description: string;
+  status: TicketStatus;
+  adminReply?: string; 
+  createdAt: string;
+}

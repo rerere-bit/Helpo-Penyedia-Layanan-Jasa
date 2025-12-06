@@ -1,6 +1,7 @@
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   type UserCredential
 } from "firebase/auth";
@@ -54,4 +55,15 @@ export const loginUser = async (email: string, pass: string) => {
 export const logoutUser = async () => {
   console.debug('[auth] logoutUser');
   return await signOut(auth);
+};
+
+export const resetPassword = async (email: string) => {
+  try {
+    console.debug('[auth] resetPassword start', { email });
+    await sendPasswordResetEmail(auth, email);
+    return true;
+  } catch (error: any) {
+    console.error('[auth] resetPassword error', error);
+    throw new Error(error?.message || 'Gagal mengirim email reset');
+  }
 };

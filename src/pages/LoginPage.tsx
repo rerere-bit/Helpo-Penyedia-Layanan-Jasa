@@ -2,14 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod'; 
 import { User, Briefcase, AlertCircle, Clock, Eye, EyeOff } from 'lucide-react';
-
-// Import Component (Menggunakan relative path agar aman)
 import MainLayout from '../components/layout/MainLayout';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-
-// Import Service (Disesuaikan dengan lokasi file service yang sudah kita buat)
 import { loginUser } from '../services/auth.service';
 import { getUserProfile } from '../services/user.service';
 
@@ -179,19 +175,12 @@ const LoginPage = () => {
             {/* Password Input */}
             <div>
               <div className="relative">
-                <Input
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={
-                    (errors.password
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                      : "") + " pr-10"
-                  }
-                />
+              <div className="flex justify-between items-center mb-1">
+                 <label className="block text-sm font-medium text-gray-700">Password</label>
+                 <Link to="/forgot-password" className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
+                   Lupa Password?
+                 </Link>
+              </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}

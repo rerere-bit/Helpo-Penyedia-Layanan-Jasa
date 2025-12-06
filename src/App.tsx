@@ -4,6 +4,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DashboardHomePage from './pages/DashboardHomePage';
 import ServiceListingPage from './pages/ServiceListingPage';
 import ServiceDetailPage from './pages/ServiceDetailPage';
@@ -25,6 +26,8 @@ import ProviderOrdersPage from './pages/provider/ProviderOrdersPage';
 import ProviderServicesPage from './pages/provider/ProviderServicesPage';
 import ProviderSettingsPage from './pages/provider/ProviderSettingsPage';
 import ProviderNotificationPage from './pages/provider/ProviderNotificationPage';
+import ProviderSchedulePage from './pages/provider/ProviderSchedulePage';
+
 
 function App() {
   const { loading } = useAuth();
@@ -48,6 +51,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         
         {/* Strategi Marketing: Biarkan orang lihat list jasa tanpa login */}
         <Route path="/services" element={<ServiceListingPage />} />
@@ -174,6 +178,12 @@ function App() {
         <Route path="/provider/notifications" element={
           <ProtectedRoute onlyProvider={true}>
             <ProviderNotificationPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/provider/schedule" element={
+          <ProtectedRoute onlyProvider={true}>
+            <ProviderSchedulePage />
           </ProtectedRoute>
         } />
 
