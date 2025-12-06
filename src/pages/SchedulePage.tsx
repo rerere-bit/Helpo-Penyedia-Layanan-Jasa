@@ -156,7 +156,7 @@ const SchedulePage = () => {
             
             <button 
               onClick={() => setIsReminderOn(!isReminderOn)}
-              className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none ${isReminderOn ? 'bg-primary' : 'bg-gray-300'}`}
+              className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none ${isReminderOn ? 'bg-blue-800' : 'bg-gray-300'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${isReminderOn ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
@@ -185,7 +185,7 @@ const SchedulePage = () => {
                   <span className="w-2.5 h-2.5 bg-blue-500 rounded-full ring-2 ring-gray-100"></span> Ada Jadwal
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 bg-primary rounded-full"></span> Dipilih
+                  <span className="w-2.5 h-2.5 bg-blue-800 rounded-full"></span> Dipilih
                 </div>
               </div>
             </Card>

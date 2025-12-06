@@ -89,7 +89,7 @@ const BookingPage = () => {
             if (!isCurrentMonth || isPast) {
               btnStateClass = 'text-gray-300 cursor-not-allowed';
             } else if (isSelected) {
-              btnStateClass = 'bg-primary text-white hover:bg-primary shadow-md shadow-blue-200';
+              btnStateClass = 'bg-blue-800 text-white hover:bg-blue-800 shadow-md shadow-blue-200';
             } else {
               btnStateClass = 'hover:bg-blue-50 text-gray-700';
             }

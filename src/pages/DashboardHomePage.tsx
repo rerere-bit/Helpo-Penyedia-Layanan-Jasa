@@ -99,7 +99,7 @@ const DashboardHomePage = () => {
             {[1, 2, 3].map((_, i) => (
               <Card key={i} className="p-6">
                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">U</div>
+                    <div className="w-10 h-10 bg-blue-800 text-white rounded-full flex items-center justify-center font-bold">U</div>
                     <div>
                        <h4 className="font-bold text-sm">User {i+1}</h4>
                        <div className="flex text-yellow-400 text-xs">
