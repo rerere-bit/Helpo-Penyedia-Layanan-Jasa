@@ -1,14 +1,15 @@
 import React from 'react';
 import { RotateCcw, ChevronDown, Star } from 'lucide-react';
 import { Button } from '@/components/common/Button';
-import type { FilterState } from '@/types';
+import type { FilterState, Category } from '@/types'; 
 
 interface FilterSidebarProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+  categories: Category[]; // Tambahan Props
 }
 
-export const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) => {
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters, categories }) => {
   
   const handleReset = () => {
     setFilters({
@@ -32,6 +33,26 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilter
         <button onClick={handleReset} className="text-gray-400 hover:text-primary transition-colors">
           <RotateCcw size={16} />
         </button>
+      </div>
+
+      {/* Dynamic Category Dropdown */}
+      <div className="mb-6">
+        <label className="block text-xs font-semibold text-gray-500 mb-2">Kategori</label>
+        <div className="relative">
+          <select 
+            value={filters.category}
+            onChange={(e) => handleChange('category', e.target.value)}
+            className="w-full appearance-none bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:border-primary focus:outline-none cursor-pointer"
+          >
+            <option value="Semua">Semua Kategori</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.label}>
+                {cat.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+        </div>
       </div>
 
       {/* Kategori */}
