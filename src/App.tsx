@@ -25,6 +25,8 @@ import ProviderOrdersPage from './pages/provider/ProviderOrdersPage';
 import ProviderServicesPage from './pages/provider/ProviderServicesPage';
 import ProviderSettingsPage from './pages/provider/ProviderSettingsPage';
 import ProviderNotificationPage from './pages/provider/ProviderNotificationPage';
+import ProviderSchedulePage from './pages/provider/ProviderSchedulePage';
+
 
 function App() {
   const { loading } = useAuth();
@@ -174,6 +176,12 @@ function App() {
         <Route path="/provider/notifications" element={
           <ProtectedRoute onlyProvider={true}>
             <ProviderNotificationPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/provider/schedule" element={
+          <ProtectedRoute onlyProvider={true}>
+            <ProviderSchedulePage />
           </ProtectedRoute>
         } />
 

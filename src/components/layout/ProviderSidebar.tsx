@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ListOrdered, Briefcase, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, Briefcase, LogOut, Settings, Calendar } from 'lucide-react'; 
 import { useAuth } from '@/context/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -22,6 +22,7 @@ const ProviderSidebar = () => {
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/provider/dashboard' },
     { name: 'Pesanan', icon: <ListOrdered size={20} />, path: '/provider/orders' },
     { name: 'Layanan Saya', icon: <Briefcase size={20} />, path: '/provider/services' },
+    { name: 'Atur Jadwal', icon: <Calendar size={20} />, path: '/provider/schedule' },
   ];
 
   return (

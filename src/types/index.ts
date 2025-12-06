@@ -117,3 +117,13 @@ export interface ReviewInput {
   rating: number;
   comment: string;
 }
+
+export interface ProviderSchedule {
+  providerId: string;
+  workingDays: number[];
+  workingHours: {
+    start: string; 
+    end: string;   
+  };
+  exceptions: string[]; 
+}
