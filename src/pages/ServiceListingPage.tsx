@@ -1,111 +1,144 @@
-import { useState, useMemo } from 'react';
+// src/pages/ServiceListingPage.tsx
+
+import { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Jika dibutuhkan navigasi
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Container } from '@/components/common/Container';
 import { ServiceCard } from '@/components/sections/services/ServiceCard';
 import { FilterSidebar } from '@/components/sections/services/FilterSidebar';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import type { Service, FilterState } from '@/types';
+import { Search, SlidersHorizontal, Database, Loader2 } from 'lucide-react';
 
-// DATA DUMMY LENGKAP
-const SERVICES_DATA: Service[] = [
-  {
-    id: '1',
-    title: 'Bersih Rumah Premium',
-    category: 'Pembersihan',
-    price: 150000,
-    rating: 4.9,
-    reviewCount: 127,
-    description: 'Layanan kebersihan menyeluruh untuk rumah Anda.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1581578731117-104f2a8d23e9?auto=format&fit=crop&w=800&q=80',
-    provider: { name: 'Helpo Clean', location: 'Jakarta', isVerified: true }
-  },
-  {
-    id: '2',
-    title: 'Service AC Profesional',
-    category: 'Perbaikan',
-    price: 75000,
-    rating: 4.5,
-    reviewCount: 85,
-    description: 'Cuci AC dan isi freon dengan teknisi bersertifikat.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80',
-    provider: { name: 'Cool Air', location: 'Bandung', isVerified: true }
-  },
-  {
-    id: '3',
-    title: 'Ahli Listrik 24 Jam',
-    category: 'Listrik',
-    price: 200000,
-    rating: 5.0,
-    reviewCount: 42,
-    description: 'Perbaikan instalasi listrik dan korsleting.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=800&q=80',
-    provider: { name: 'Volt Master', location: 'Jakarta', isVerified: true }
-  },
-  {
-    id: '4',
-    title: 'Jasa Taman & Landscape',
-    category: 'Taman',
-    price: 300000,
-    rating: 4.7,
-    reviewCount: 64,
-    description: 'Pembuatan dan perawatan taman rumah minimalis.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=800&q=80',
-    provider: { name: 'Green Garden', location: 'Bandung', isVerified: true }
-  },
-  {
-    id: '5',
-    title: 'Cat Dinding Interior',
-    category: 'Cat',
-    price: 500000,
-    rating: 4.8,
-    reviewCount: 110,
-    description: 'Pengecatan ulang dinding rumah dengan cat premium.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=800&q=80',
-    provider: { name: 'Color Pro', location: 'Surabaya', isVerified: true }
-  }
-];
+// Import Logic Backend
+import { MarketService } from '@/services/market.service';
+// Import Tipe Backend (Alias agar tidak bentrok dengan tipe Frontend)
+import type { Service as BackendService } from '@/types/market'; 
+import type { Service as FrontendService, FilterState } from '@/types';
 
 const ServiceListingPage = () => {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
-  
+  const [dbServices, setDbServices] = useState<FrontendService[]>([]); // Data dari Firebase
+  const [loading, setLoading] = useState(true);
+
   // State Filter Utama
   const [filters, setFilters] = useState<FilterState>({
     keyword: '',
     category: 'Semua',
     location: 'Semua',
     minPrice: 0,
-    maxPrice: 1000000,
+    maxPrice: 5000000, // Adjusted max price
     minRating: 0
   });
 
-  // Logika Filtering (dijalankan setiap kali filters berubah)
+  // --- 1. FETCH DATA DARI FIREBASE ---
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    setLoading(true);
+    try {
+      // Ambil data mentah dari Firestore
+      const rawData = await MarketService.getServices();
+      
+      // TRANSFORMASI DATA: Backend Type -> Frontend Type
+      // Kita sesuaikan struktur agar ServiceCard tidak error
+      const mappedData: FrontendService[] = rawData.map((item: BackendService) => ({
+        id: item.id || 'unknown',
+        title: item.title,
+        category: item.category,
+        price: item.price,
+        rating: item.rating,
+        reviewCount: item.reviewCount,
+        description: item.description,
+        thumbnailUrl: item.thumbnailUrl,
+        // Mocking Provider Object (Karena di backend baru simpan providerId)
+        provider: { 
+          name: 'Mitra Helpo', // Nanti kita ambil dari collection Users
+          location: item.location, 
+          isVerified: true 
+        }
+      }));
+
+      setDbServices(mappedData);
+    } catch (error) {
+      console.error("Gagal load data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- 2. SEED DATA FUNCTION (Tombol Rahasia) ---
+  const handleSeedData = async () => {
+    if(!confirm("Isi database dengan data dummy?")) return;
+    setLoading(true);
+    try {
+      // Contoh data dummy 1
+      await MarketService.createService({
+        providerId: "prov_001",
+        title: "Cuci AC Split 1 PK",
+        category: "Pembersihan", // Sesuaikan dengan filter Anda
+        description: "Pembersihan AC menyeluruh, anti bocor, garansi 30 hari.",
+        price: 85000,
+        thumbnailUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80",
+        isActive: true,
+        location: "Jakarta Selatan"
+      });
+      // Contoh data dummy 2
+      await MarketService.createService({
+        providerId: "prov_002",
+        title: "Service Kulkas 2 Pintu",
+        category: "Elektronik",
+        description: "Perbaikan kulkas tidak dingin, ganti freon.",
+        price: 150000,
+        thumbnailUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80",
+        isActive: true,
+        location: "Bandung"
+      });
+      
+      await fetchServices(); // Refresh data
+      alert("Data berhasil ditambahkan!");
+    } catch (e) {
+      alert("Gagal seed data");
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- 3. LOGIKA FILTERING (Client Side) ---
   const filteredServices = useMemo(() => {
-    return SERVICES_DATA.filter(service => {
-      // 1. Filter Keyword (Judul atau Deskripsi)
+    return dbServices.filter(service => {
       const matchKeyword = 
         service.title.toLowerCase().includes(filters.keyword.toLowerCase()) || 
         service.description.toLowerCase().includes(filters.keyword.toLowerCase());
 
-      // 2. Filter Kategori
       const matchCategory = filters.category === 'Semua' || service.category === filters.category;
-
-      // 3. Filter Lokasi
-      const matchLocation = filters.location === 'Semua' || service.provider.location === filters.location;
-
-      // 4. Filter Harga
-      const matchPrice = service.price <= filters.maxPrice;
-
-      // 5. Filter Rating
+      
+      // Pencocokan lokasi agak loose (contains)
+      const matchLocation = filters.location === 'Semua' || service.provider.location.includes(filters.location);
+      
+      const matchPrice = service.price <= filters.maxPrice && service.price >= filters.minPrice;
       const matchRating = service.rating >= filters.minRating;
 
       return matchKeyword && matchCategory && matchLocation && matchPrice && matchRating;
     });
-  }, [filters]);
+  }, [filters, dbServices]); // Dependency array diupdate ke dbServices
 
   return (
     <DashboardLayout>
       <Container>
-        {/* Search Bar */}
+        {/* Header & Search */}
+        <div className="flex justify-between items-center mb-4">
+           {/* Tombol Seed Data (Development Only) */}
+           <button 
+              onClick={handleSeedData}
+              className="flex items-center gap-2 text-xs text-gray-400 hover:text-blue-600 border border-dashed border-gray-300 px-3 py-1 rounded"
+              title="Isi database dengan dummy data"
+           >
+             <Database size={12} /> Seed DB
+           </button>
+        </div>
+
         <div className="relative mb-8">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input 
@@ -142,17 +175,26 @@ const ServiceListingPage = () => {
               </h2>
             </div>
             
-            {filteredServices.length > 0 ? (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="animate-spin text-primary mb-2" size={32} />
+                <p className="text-gray-400">Mengambil data layanan...</p>
+              </div>
+            ) : filteredServices.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredServices.map((service) => (
+                  // Pastikan ServiceCard menerima data sesuai tipe FrontendService
                   <ServiceCard key={service.id} data={service} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                <p className="text-gray-500 text-lg">Tidak ada layanan yang cocok dengan filter Anda.</p>
+                <p className="text-gray-500 text-lg">Tidak ada layanan yang cocok.</p>
+                {dbServices.length === 0 && (
+                   <p className="text-sm text-gray-400 mt-2">Database masih kosong. Coba klik tombol 'Seed DB' di atas.</p>
+                )}
                 <button 
-                  onClick={() => setFilters({ keyword: '', category: 'Semua', location: 'Semua', minPrice: 0, maxPrice: 1000000, minRating: 0 })}
+                  onClick={() => setFilters({ keyword: '', category: 'Semua', location: 'Semua', minPrice: 0, maxPrice: 5000000, minRating: 0 })}
                   className="mt-4 text-primary font-bold hover:underline"
                 >
                   Reset Filter
