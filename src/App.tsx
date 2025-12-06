@@ -24,6 +24,7 @@ import ProviderDashboard from './pages/provider/ProviderDashboard';
 import ProviderOrdersPage from './pages/provider/ProviderOrdersPage';
 import ProviderServicesPage from './pages/provider/ProviderServicesPage';
 import ProviderSettingsPage from './pages/provider/ProviderSettingsPage';
+import ProviderNotificationPage from './pages/provider/ProviderNotificationPage';
 
 function App() {
   const { loading } = useAuth();
@@ -167,6 +168,12 @@ function App() {
         <Route path="/provider/settings" element={
           <ProtectedRoute onlyProvider={true}>
             <ProviderSettingsPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/provider/notifications" element={
+          <ProtectedRoute onlyProvider={true}>
+            <ProviderNotificationPage />
           </ProtectedRoute>
         } />
 
