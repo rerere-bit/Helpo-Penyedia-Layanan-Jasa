@@ -19,7 +19,6 @@ const ProviderServicesPage = () => {
   const [formData, setFormData] = useState({
     title: '', category: 'Pembersihan', description: '', price: ''
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // 1. Fetch Data saat halaman dimuat
   useEffect(() => {
@@ -40,18 +39,17 @@ const ProviderServicesPage = () => {
 
   const handleAddService = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !imageFile) return;
+    if (!user) return;
 
     setIsSubmitting(true);
     try {
       await addService(user.uid, {
         ...formData,
         price: Number(formData.price),
-        imageFile
+        imageFile: null as any
       });
       setIsModalOpen(false);
       setFormData({ title: '', category: 'Pembersihan', description: '', price: '' });
-      setImageFile(null);
       fetchServices(); // Refresh list
     } catch (error) {
       alert('Gagal menambah jasa');
@@ -166,11 +164,6 @@ const ProviderServicesPage = () => {
                     onChange={e => setFormData({...formData, description: e.target.value})}
                     required
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Foto Layanan</label>
-                  <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} required className="w-full" />
                 </div>
 
                 <Button fullWidth disabled={isSubmitting} type="submit">

@@ -7,19 +7,9 @@ import type { Service, ServiceInput } from "@/types";
 
 const COLLECTION_NAME = "services";
 
-/**
- * Upload gambar thumbnail jasa ke Storage
- */
-const uploadServiceImage = async (file: File, providerId: string) => {
-  const filename = `services/${providerId}_${Date.now()}_${file.name}`;
-  const storageRef = ref(storage, filename);
-  const snapshot = await uploadBytes(storageRef, file);
-  return await getDownloadURL(snapshot.ref);
-};
-
 export const addService = async (providerId: string, input: ServiceInput) => {
   try {
-    const imageUrl = await uploadServiceImage(input.imageFile, providerId);
+    const randomImage = `https://source.unsplash.com/random/800x600/?${input.category},service`;
 
     // Data yang akan masuk ke Firestore
     const newService = {
@@ -28,7 +18,7 @@ export const addService = async (providerId: string, input: ServiceInput) => {
       category: input.category,
       description: input.description,
       price: Number(input.price),
-      thumbnailUrl: imageUrl,
+      thumbnailUrl: randomImage,
       isActive: true, // Default aktif saat dibuat
       rating: 0,
       reviewCount: 0,
