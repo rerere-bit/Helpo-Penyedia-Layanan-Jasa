@@ -30,14 +30,13 @@ const ProviderSidebar = () => {
       
       {/* 1. Logo Area */}
       <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-100">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-          H
-        </div>
-        <div>
-          <span className="text-lg font-bold text-gray-800 block leading-none">Helpo</span>
+        <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-blue-200 shadow-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span className="text-2xl font-light text-gray-800 tracking-tight">Helpo</span>
           <span className="text-[10px] text-blue-600 font-semibold tracking-wider">MITRA</span>
         </div>
-      </div>
+      
 
       {/* 2. Navigation Menu */}
       <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">

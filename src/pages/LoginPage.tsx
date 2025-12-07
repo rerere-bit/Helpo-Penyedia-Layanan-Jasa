@@ -174,17 +174,26 @@ const LoginPage = () => {
 
             {/* Password Input */}
             <div>
-              <div className="relative">
               <div className="flex justify-between items-center mb-1">
-                 <label className="block text-sm font-medium text-gray-700">Password</label>
+                 <label className="block text-sm font-medium text-gray-700" htmlFor="password">Password</label>
                  <Link to="/forgot-password" className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
                    Lupa Password?
                  </Link>
               </div>
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400 ${errors.password ? "border-red-300 focus:border-red-500 focus:ring-red-200" : ""}`}
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute bottom-3 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                   aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
