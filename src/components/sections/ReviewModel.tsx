@@ -4,15 +4,18 @@ import { useState } from 'react';
 import { Star, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { MarketService } from '@/services/market.service';
+import { useAuth } from '@/context/AuthContext'; // [PENTING] Import Auth Context
 
 interface ReviewModalProps {
   serviceId: string;
-  providerId: string; // Diperlukan untuk data review
+  providerId: string; 
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export const ReviewModal = ({ serviceId, providerId, onClose, onSuccess }: ReviewModalProps) => {
+  const { user } = useAuth(); // [PENTING] Ambil data user yang sedang login
+  
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -20,6 +23,13 @@ export const ReviewModal = ({ serviceId, providerId, onClose, onSuccess }: Revie
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validasi Login
+    if (!user) {
+      alert("Silakan login terlebih dahulu untuk memberikan ulasan.");
+      return;
+    }
+
     if (rating === 0) {
       alert("Mohon berikan bintang rating.");
       return;
@@ -30,15 +40,18 @@ export const ReviewModal = ({ serviceId, providerId, onClose, onSuccess }: Revie
       await MarketService.addReview({
         serviceId,
         providerId,
-        // Mock data order & customer (karena belum ada modul Order/Auth real)
-        orderId: "order_dummy_" + Date.now(), 
-        customerId: "user_test_123", 
+        // Mock ID order (karena modul order belum terintegrasi penuh ke review)
+        orderId: "order_" + Date.now(), 
+        
+        // [FIX UTAMA] Gunakan UID asli dari user yang login
+        customerId: user.uid, 
+        
         rating,
         comment
       });
       
       alert("Ulasan berhasil dikirim!");
-      onSuccess(); // Refresh data di halaman induk
+      onSuccess(); 
       onClose();
     } catch (error) {
       console.error(error);
