@@ -87,7 +87,7 @@ const BookingPage = () => {
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
                     ${!isCurrentMonth || isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-blue-50 text-gray-700'}
-                    ${isSelected ? 'bg-primary text-white hover:bg-primary shadow-md shadow-blue-200' : ''}
+                    ${isSelected ? 'bg-blue-800 text-white hover:bg-blue-800 shadow-md shadow-blue-200' : ''}
                   `}
                 >
                   {format(dayItem, 'd')}

@@ -104,7 +104,7 @@ const NotificationPage = () => {
                         <h3 className={`text-base mb-1 ${!notif.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
                           {notif.title}
                         </h3>
-                        {!notif.isRead && <span className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0"></span>}
+                        {!notif.isRead && <span className="w-2.5 h-2.5 rounded-full bg-blue-800 mt-1.5 shrink-0"></span>}
                       </div>
                       <p className="text-gray-500 text-sm leading-relaxed mb-2">{notif.message}</p>
                       <p className="text-xs text-gray-400">{formatDate(notif.createdAt)}</p>
