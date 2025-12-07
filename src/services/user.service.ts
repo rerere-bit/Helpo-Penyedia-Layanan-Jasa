@@ -1,6 +1,7 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../lib/firebase";
+import { auth, db } from '@/lib/firebase';
+import { updateProfile } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { uploadToCloudinary } from './cloudinary.service'; // Pastikan file ini sudah dibuat sesuai langkah sebelumnya
 
 // Tipe data yang bisa di-update
 export interface UserProfileUpdate {
@@ -8,6 +9,7 @@ export interface UserProfileUpdate {
   phoneNumber?: string;
   address?: string;
   photoURL?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -19,53 +21,64 @@ export const getUserProfile = async (uid: string) => {
   if (docSnap.exists()) {
     return docSnap.data();
   } else {
-    throw new Error("User tidak ditemukan");
+    // Jika dokumen user belum ada di Firestore (misal login pertama), return null atau object kosong
+    return null;
   }
 };
 
 /**
- * Update data teks user di Firestore
+ * Update data teks user di Firestore & Firebase Auth
  */
 export const updateUserProfile = async (uid: string, data: UserProfileUpdate) => {
   try {
     const userRef = doc(db, "users", uid);
-    // Use setDoc with merge to create the document if it doesn't exist
+    
+    // 1. Update di Firestore (Database Data Diri)
+    // Gunakan setDoc dengan { merge: true } agar jika dokumen belum ada, akan dibuatkan
     await setDoc(userRef, {
       ...data,
-      updatedAt: new Date().toISOString() // Good practice: Catat kapan terakhir update
+      updatedAt: new Date().toISOString()
     }, { merge: true });
+
+    // 2. Update di Firebase Auth (Display Name)
+    // Ini penting agar nama di pojok kanan atas (header) langsung berubah tanpa refresh page
+    if (auth.currentUser && data.displayName) {
+      await updateProfile(auth.currentUser, {
+        displayName: data.displayName
+      });
+    }
+
     return true;
   } catch (error: any) {
+    console.error("Error updating profile:", error);
     throw new Error(error.message);
   }
 };
 
 /**
- * Upload foto ke Firebase Storage & ambil URL-nya
+ * Upload foto ke Cloudinary & Update URL di Profil User
  */
 export const uploadProfileImage = async (uid: string, file: File) => {
   try {
-    // 1. Buat alamat file: profile_images/UID_USER.jpg
-    // Kita pakai UID sebagai nama file agar 1 user cuma punya 1 foto (foto lama tertimpa otomatis)
-    // Ini menghemat storage.
-    const storageRef = ref(storage, `profile_images/${uid}`);
+    if (!auth.currentUser) throw new Error("User tidak login");
 
-    // 2. Proses Upload
-    console.info('[user.service] Starting upload for', uid, file.name, file.size);
-    const snapshot = await uploadBytes(storageRef, file);
-    console.info('[user.service] Upload finished, snapshot:', snapshot.metadata?.name || '(no name)');
+    // 1. Upload Gambar ke Cloudinary (Unsigned Upload)
+    console.info('[user.service] Uploading to Cloudinary...');
+    const downloadURL = await uploadToCloudinary(file);
+    console.info('[user.service] Cloudinary URL:', downloadURL);
 
-    // 3. Ambil URL public-nya
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    // 2. Update URL foto di Firebase Authentication 
+    // (Agar avatar di Navbar langsung berubah)
+    await updateProfile(auth.currentUser, {
+      photoURL: downloadURL
+    });
 
-    // 4. Update langsung field photoURL di database user
-    console.info('[user.service] Saving downloadURL to user doc', downloadURL);
+    // 3. Update field photoURL di Firestore
     await updateUserProfile(uid, { photoURL: downloadURL });
-
-    console.info('[user.service] photoURL saved for', uid);
 
     return downloadURL;
   } catch (error: any) {
+    console.error("Gagal upload gambar:", error);
     throw new Error("Gagal upload gambar: " + error.message);
   }
 };

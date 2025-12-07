@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ChevronLeft, Save } from 'lucide-react';
+import { Camera, ChevronLeft, Save, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Container } from '@/components/common/Container';
 import { Card } from '@/components/common/Card';
@@ -11,7 +11,8 @@ import { updateUserProfile, uploadProfileImage } from '@/services/user.service';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
-  const { user, refreshUserProfile } = useAuth();
+  const { user, refreshUserProfile } = useAuth(); // Pastikan AuthContext menyediakan refreshUserProfile
+  
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -25,14 +26,14 @@ const EditProfilePage = () => {
     address: ''
   });
 
-  // Inisialisasi form dengan data user
+  // Inisialisasi form dengan data user saat ini
   useEffect(() => {
     if (user) {
       setFormData({
         displayName: user.displayName || '',
         email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        address: user.address || ''
+        phoneNumber: user.phoneNumber || '', // Pastikan field ini ada di tipe User context Anda
+        address: user.address || ''        // Pastikan field ini ada di tipe User context Anda
       });
       if (user.photoURL) {
         setImagePreview(user.photoURL);
@@ -63,7 +64,7 @@ const EditProfilePage = () => {
       setImageFile(file);
       setError('');
       
-      // Preview gambar
+      // Preview gambar lokal sebelum upload
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -77,12 +78,9 @@ const EditProfilePage = () => {
     setError('');
     setSuccess('');
     
-    if (!user) {
-      setError('User tidak ditemukan');
-      return;
-    }
+    if (!user) return;
 
-    // Validasi nama tidak boleh kosong
+    // Validasi sederhana
     if (!formData.displayName.trim()) {
       setError('Nama lengkap tidak boleh kosong');
       return;
@@ -91,36 +89,30 @@ const EditProfilePage = () => {
     setIsLoading(true);
 
     try {
-      console.info('[EditProfilePage] Saving profile for', user.uid);
-      // Jika ada file gambar baru, upload terlebih dahulu
+      // 1. Jika ada file gambar baru, upload ke Cloudinary dulu
       if (imageFile) {
-        console.info('[EditProfilePage] Uploading image', imageFile.name, imageFile.size);
         await uploadProfileImage(user.uid, imageFile);
-        console.info('[EditProfilePage] Image upload done');
       }
 
-      // Update data profil
-      console.info('[EditProfilePage] Updating profile fields', {
-        displayName: formData.displayName,
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
-      });
+      // 2. Update data profil (Nama, Telp, Alamat) ke Firestore
       await updateUserProfile(user.uid, {
         displayName: formData.displayName,
         phoneNumber: formData.phoneNumber,
         address: formData.address,
       });
-      console.info('[EditProfilePage] Profile update done');
 
-      // Refresh data user di context
+      // 3. Trigger refresh data user di aplikasi agar UI update otomatis
       if (refreshUserProfile) {
         await refreshUserProfile();
       }
 
       setSuccess('Profil berhasil diperbarui!');
+      
+      // Redirect kembali ke halaman profil setelah 1.5 detik
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
+
     } catch (err: any) {
       setError(err.message || 'Gagal menyimpan profil');
       console.error('Error saving profile:', err);
@@ -149,12 +141,12 @@ const EditProfilePage = () => {
 
           {/* Alert Messages */}
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm animate-in fade-in slide-in-from-top-2">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm animate-in fade-in slide-in-from-top-2">
               {success}
             </div>
           )}
@@ -175,17 +167,19 @@ const EditProfilePage = () => {
                   <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera className="text-white" size={24} />
                   </div>
-                </div>
-                <label className="text-sm text-primary font-semibold cursor-pointer hover:underline">
-                  Ubah Foto Profil
+                  {/* Input File Tersembunyi */}
                   <input 
                     type="file" 
                     accept="image/*" 
                     onChange={handleImageChange}
-                    className="hidden"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     disabled={isLoading}
                   />
-                </label>
+                </div>
+                <p className="text-sm text-primary font-semibold hover:underline cursor-pointer">
+                  Ubah Foto Profil
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Maks. 5MB (JPG, PNG)</p>
               </div>
 
               {/* Form Input */}
@@ -196,6 +190,7 @@ const EditProfilePage = () => {
                   value={formData.displayName} 
                   onChange={handleChange}
                   disabled={isLoading}
+                  placeholder="Nama Anda"
                 />
                 
                 <div className="space-y-1.5">
@@ -203,7 +198,7 @@ const EditProfilePage = () => {
                   <input 
                     disabled 
                     value={formData.email} 
-                    className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-transparent text-gray-500 cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-transparent text-gray-500 cursor-not-allowed focus:outline-none"
                     title="Email tidak dapat diubah"
                   />
                   <p className="text-xs text-gray-400">Email tidak dapat diubah</p>
@@ -214,7 +209,7 @@ const EditProfilePage = () => {
                   name="phoneNumber" 
                   value={formData.phoneNumber} 
                   onChange={handleChange}
-                  placeholder="+62 812-3456-7890"
+                  placeholder="+62 812-xxxx-xxxx"
                   disabled={isLoading}
                 />
 
@@ -227,7 +222,7 @@ const EditProfilePage = () => {
                     rows={3}
                     placeholder="Masukkan alamat lengkap Anda"
                     disabled={isLoading}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 resize-none disabled:opacity-50"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 resize-none disabled:opacity-50 "
                   />
                 </div>
               </div>
@@ -239,6 +234,7 @@ const EditProfilePage = () => {
                   variant="outline" 
                   className="flex-1 border-gray-300 text-gray-700"
                   onClick={() => navigate('/profile')}
+                  disabled={isLoading}
                 >
                   Batal
                 </Button>
@@ -247,9 +243,18 @@ const EditProfilePage = () => {
                   variant="primary" 
                   className="flex-1"
                   disabled={isLoading}
-                  icon={<Save size={18} />}
                 >
-                  {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin mr-2" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} className="mr-2" />
+                      Simpan Perubahan
+                    </>
+                  )}
                 </Button>
               </div>
 
